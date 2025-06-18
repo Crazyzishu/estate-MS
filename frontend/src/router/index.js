@@ -1,17 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import IndexView from '../views/index/index.vue'
+import routes from './views'
 
-const routes = [
-  {
-    path: '/',
-    name: 'index',
-    component: IndexView
-  }
-]
-
-const router = createRouter({
+export default createRouter({
   history: createWebHistory(),
   routes
 })
-
-export default router

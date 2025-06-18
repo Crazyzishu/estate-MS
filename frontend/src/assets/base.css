@@ -72,3 +72,45 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+.text-success {
+  color: #52c41a !important;
+}
+
+.text-warning {
+  color: #faad14 !important;
+}
+
+.text-danger {
+  color: #ff4d4f !important;
+}
+
+.text-primary {
+  color: #165dff !important;
+}
+
+.primary-text {
+  color: #165dff;
+}
+
+.price-range-separator {
+  margin: 0 10px;
+  color: #999;
+}
+
+.upload-hint {
+  font-size: 12px;
+  color: #999;
+  margin-top: 8px;
+  display: block;
+}
+
+.detail-row .label {
+  font-weight: bold;
+  width: 90px;
+  flex-shrink: 0;
+}
+
+/* 在现有样式基础上添加 */
+.el-table__row .cell {
+  white-space: nowrap;
+}
