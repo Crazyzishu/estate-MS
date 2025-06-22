@@ -6,6 +6,7 @@ import Appointments from '../views/Appointments.vue'
 import EstateNews from '../views/EstateNews.vue'
 import Complaint from '../views/Complaint.vue'
 import UserManager from '../views/UserManager.vue'
+import ContractForm from "../views/ContractForm.vue";
 
 export default [
   { path: '/', component: Dashboard, meta: { title: '数据概览' } },
@@ -16,6 +17,6 @@ export default [
   { path: '/estateNews', component: EstateNews, meta: { titile: '楼盘动态' } },
   { path: '/complaint', component: Complaint, meta: { title: '投诉处理' } },
   { path: '/userManager', component: UserManager, meta: { title: '用户管理' } },
-    
-  
+  { path: '/contracts/new', component: ContractForm, meta: { title: '新增合同' } },
+
 ]

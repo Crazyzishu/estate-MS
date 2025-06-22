@@ -1,0 +1,1362 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>预约看房管理系统</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/element-plus@2.3.12/dist/index.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/element-plus@2.3.12/dist/index.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue@3.4.24/dist/vue.global.prod.min.js"></script>
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#165DFF',
+            secondary: '#0FC6C2',
+            success: '#52C41A',
+            warning: '#FAAD14',
+            danger: '#FF4D4F',
+            info: '#86909C',
+            light: '#F2F3F5',
+            dark: '#1D2129',
+          },
+          fontFamily: {
+            inter: ['Inter', 'system-ui', 'sans-serif'],
+          },
+        },
+      }
+    }
+  </script>
+  
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto {
+        content-visibility: auto;
+      }
+      .sidebar-item {
+        @apply flex items-center gap-3 px-4 py-3 rounded-lg text-gray-600 hover:bg-primary/5 hover:text-primary transition-all duration-200;
+      }
+      .sidebar-item.active {
+        @apply bg-primary/10 text-primary font-medium;
+      }
+      .card {
+        @apply bg-white rounded-xl shadow-sm border border-gray-100 p-5 transition-all duration-300 hover:shadow-md;
+      }
+      .btn {
+        @apply px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center justify-center gap-2;
+      }
+      .btn-primary {
+        @apply bg-primary text-white hover:bg-primary/90 active:bg-primary/80;
+      }
+      .btn-secondary {
+        @apply bg-secondary text-white hover:bg-secondary/90 active:bg-secondary/80;
+      }
+      .btn-outline {
+        @apply border border-gray-200 hover:border-primary hover:text-primary;
+      }
+      .input {
+        @apply w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all duration-200;
+      }
+      .badge {
+        @apply px-2 py-1 rounded-full text-xs font-medium;
+      }
+      .appointment-card {
+        @apply bg-white rounded-xl shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md;
+      }
+      .appointment-card-header {
+        @apply flex items-center justify-between p-4 border-b;
+      }
+      .appointment-card-body {
+        @apply p-4;
+      }
+      .appointment-card-footer {
+        @apply flex items-center justify-between p-4 border-t;
+      }
+    }
+  </style>
+</head>
+<body class="font-inter bg-gray-50 text-gray-800">
+  <div id="app">
+    <!-- 顶部导航栏 -->
+    <header class="bg-white shadow-sm fixed top-0 left-0 right-0 z-30">
+      <div class="flex items-center justify-between px-6 py-3">
+        <div class="flex items-center gap-4">
+          <button id="sidebar-toggle" class="lg:hidden text-gray-600 hover:text-primary">
+            <i class="fa fa-bars text-xl"></i>
+          </button>
+          <div class="flex items-center gap-2">
+            <i class="fa fa-home text-primary text-2xl"></i>
+            <h1 class="text-xl font-bold text-gray-800">房产管理系统</h1>
+          </div>
+        </div>
+        
+        <div class="flex items-center gap-4">
+          <div class="relative">
+            <input type="text" placeholder="全局搜索..." class="input pr-10 w-64 hidden md:block">
+            <i class="fa fa-search absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+          </div>
+          
+          <div class="relative">
+            <button class="text-gray-600 hover:text-primary relative">
+              <i class="fa fa-bell text-xl"></i>
+              <span class="absolute -top-1 -right-1 bg-danger text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">5</span>
+            </button>
+          </div>
+          
+          <div class="flex items-center gap-3 cursor-pointer group">
+            <img src="https://picsum.photos/id/1005/200/200" alt="用户头像" class="w-8 h-8 rounded-full object-cover border-2 border-transparent group-hover:border-primary transition-all duration-200">
+            <div class="hidden md:block">
+              <p class="text-sm font-medium">张经理</p>
+              <p class="text-xs text-gray-500">高级销售</p>
+            </div>
+            <i class="fa fa-angle-down text-gray-500 group-hover:text-primary transition-all duration-200"></i>
+          </div>
+        </div>
+      </div>
+    </header>
+    
+    <!-- 侧边栏 -->
+    <aside id="sidebar" class="fixed top-0 left-0 bottom-0 w-64 bg-white shadow-sm z-20 pt-16 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out">
+      <div class="flex flex-col h-full">
+        <nav class="flex-1 px-4 py-6 overflow-y-auto">
+          <div class="mb-6">
+            <h2 class="text-xs uppercase text-gray-500 font-semibold px-4 mb-3">主要功能</h2>
+            <ul class="space-y-1">
+              <li>
+                <a href="#dashboard" class="sidebar-item" @click="activeTab = 'dashboard'">
+                  <i class="fa fa-dashboard text-lg"></i>
+                  <span>数据概览</span>
+                </a>
+              </li>
+              <li>
+                <a href="#houses" class="sidebar-item" @click="activeTab = 'houses'">
+                  <i class="fa fa-building text-lg"></i>
+                  <span>房源管理</span>
+                </a>
+              </li>
+              <li>
+                <a href="#clients" class="sidebar-item" @click="activeTab = 'clients'">
+                  <i class="fa fa-users text-lg"></i>
+                  <span>客户管理</span>
+                </a>
+              </li>
+              <li>
+                <a href="#contracts" class="sidebar-item" @click="activeTab = 'contracts'">
+                  <i class="fa fa-file-text-o text-lg"></i>
+                  <span>合同管理</span>
+                </a>
+              </li>
+              <li>
+                <a href="#ads" class="sidebar-item" @click="activeTab = 'ads'">
+                  <i class="fa fa-bullhorn text-lg"></i>
+                  <span>楼盘动态</span>
+                </a>
+              </li>
+              <li>
+                <a href="#appointments" class="sidebar-item" @click="activeTab = 'appointments'">
+                  <i class="fa fa-calendar-check-o text-lg"></i>
+                  <span>预约看房</span>
+                </a>
+              </li>
+              <li>
+                <a href="#complaints" class="sidebar-item" @click="activeTab = 'complaints'">
+                  <i class="fa fa-exclamation-circle text-lg"></i>
+                  <span>投诉处理</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+          
+          <div class="mb-6">
+            <h2 class="text-xs uppercase text-gray-500 font-semibold px-4 mb-3">系统管理</h2>
+            <ul class="space-y-1">
+              <li>
+                <a href="#users" class="sidebar-item active" @click="activeTab = 'users'">
+                  <i class="fa fa-user-o text-lg"></i>
+                  <span>用户管理</span>
+                </a>
+              </li>
+              <li>
+                <a href="#settings" class="sidebar-item" @click="activeTab = 'settings'">
+                  <i class="fa fa-cog text-lg"></i>
+                  <span>系统设置</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </nav>
+        
+        <div class="p-4 border-t border-gray-100">
+          <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+            <div class="bg-primary/10 p-2 rounded-lg">
+              <i class="fa fa-question-circle text-primary"></i>
+            </div>
+            <div>
+              <p class="text-sm font-medium">需要帮助？</p>
+              <p class="text-xs text-gray-500">查看使用手册</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+    
+    <!-- 遮罩层 -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-10 hidden lg:hidden" @click="toggleSidebar()"></div>
+    
+    <!-- 主内容区 -->
+    <main class="pt-16 lg:pl-64 min-h-screen pb-10">
+      <div class="px-6 py-8">
+        <!-- 页面标题 -->
+        <div class="mb-8">
+          <h1 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-gray-800">用户管理</h1>
+          <p class="text-gray-500 mt-1">查看和管理所有系统用户</p>
+        </div>
+        
+        <!-- 操作按钮 -->
+        <div class="flex flex-col sm:flex-row gap-4 mb-6">
+          <button class="btn btn-primary w-full sm:w-auto" @click="openAddUserModal()">
+            <i class="fa fa-plus"></i> 新增用户
+          </button>
+          <button class="btn btn-outline w-full sm:w-auto">
+            <i class="fa fa-download"></i> 导出数据
+          </button>
+        </div>
+        
+        <!-- 筛选条件 -->
+        <div class="card mb-6">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">用户ID</label>
+              <input type="text" class="input" placeholder="请输入用户ID">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">用户姓名</label>
+              <input type="text" class="input" placeholder="请输入用户姓名">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">手机号码</label>
+              <input type="text" class="input" placeholder="请输入手机号码">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">用户角色</label>
+              <select class="input">
+                <option value="">全部</option>
+                <option value="admin">管理员</option>
+                <option value="manager">销售经理</option>
+                <option value="sales">销售人员</option>
+                <option value="customer">客户</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">所属部门</label>
+              <select class="input">
+                <option value="">全部</option>
+                <option value="marketing">市场部</option>
+                <option value="sales">销售部</option>
+                <option value="customer_service">客服部</option>
+                <option value="finance">财务部</option>
+                <option value="it">技术部</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">用户状态</label>
+              <select class="input">
+                <option value="">全部</option>
+                <option value="active">正常</option>
+                <option value="inactive">停用</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="flex justify-end mt-4">
+            <button class="btn btn-outline mr-2">重置</button>
+            <button class="btn btn-primary">搜索</button>
+          </div>
+        </div>
+        
+        <!-- 用户统计 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+          <div class="card">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-gray-500 font-medium">用户总数</h3>
+              <div class="bg-primary/10 p-2 rounded-lg">
+                <i class="fa fa-users text-primary"></i>
+              </div>
+            </div>
+            <div class="flex items-end justify-between">
+              <div>
+                <p class="text-3xl font-bold">528</p>
+                <p class="text-success text-sm flex items-center">
+                  <i class="fa fa-arrow-up mr-1"></i> 12.5%
+                  <span class="text-gray-500 ml-1">较上月</span>
+                </p>
+              </div>
+              <div class="w-20 h-20">
+                <canvas id="user-chart-1"></canvas>
+              </div>
+            </div>
+          </div>
+          
+          <div class="card">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-gray-500 font-medium">活跃用户</h3>
+              <div class="bg-success/10 p-2 rounded-lg">
+                <i class="fa fa-user-circle text-success"></i>
+              </div>
+            </div>
+            <div class="flex items-end justify-between">
+              <div>
+                <p class="text-3xl font-bold">482</p>
+                <p class="text-success text-sm flex items-center">
+                  <i class="fa fa-arrow-up mr-1"></i> 9.3%
+                  <span class="text-gray-500 ml-1">较上月</span>
+                </p>
+              </div>
+              <div class="w-20 h-20">
+                <canvas id="user-chart-2"></canvas>
+              </div>
+            </div>
+          </div>
+          
+          <div class="card">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-gray-500 font-medium">停用用户</h3>
+              <div class="bg-danger/10 p-2 rounded-lg">
+                <i class="fa fa-user-times text-danger"></i>
+              </div>
+            </div>
+            <div class="flex items-end justify-between">
+              <div>
+                <p class="text-3xl font-bold">46</p>
+                <p class="text-danger text-sm flex items-center">
+                  <i class="fa fa-arrow-down mr-1"></i> 7.8%
+                  <span class="text-gray-500 ml-1">较上月</span>
+                </p>
+              </div>
+              <div class="w-20 h-20">
+                <canvas id="user-chart-3"></canvas>
+              </div>
+            </div>
+          </div>
+          
+          <div class="card">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-gray-500 font-medium">本月新增</h3>
+              <div class="bg-secondary/10 p-2 rounded-lg">
+                <i class="fa fa-user-plus text-secondary"></i>
+              </div>
+            </div>
+            <div class="flex items-end justify-between">
+              <div>
+                <p class="text-3xl font-bold">62</p>
+                <p class="text-success text-sm flex items-center">
+                  <i class="fa fa-arrow-up mr-1"></i> 28.3%
+                  <span class="text-gray-500 ml-1">较上月</span>
+                </p>
+              </div>
+              <div class="w-20 h-20">
+                <canvas id="user-chart-4"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 用户角色分布 -->
+        <div class="card mb-6">
+          <div class="flex items-center justify-between mb-6">
+            <h3 class="font-bold text-gray-800">用户角色分布</h3>
+          </div>
+          
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="h-64">
+              <canvas id="user-role-chart"></canvas>
+            </div>
+            <div class="space-y-4">
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-sm font-medium">客户</span>
+                  <span class="text-sm font-medium">65%</span>
+                </div>
+                <div class="w-full bg-gray-100 rounded-full h-2">
+                  <div class="bg-primary h-2 rounded-full" style="width: 65%"></div>
+                </div>
+              </div>
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-sm font-medium">销售人员</span>
+                  <span class="text-sm font-medium">25%</span>
+                </div>
+                <div class="w-full bg-gray-100 rounded-full h-2">
+                  <div class="bg-secondary h-2 rounded-full" style="width: 25%"></div>
+                </div>
+              </div>
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-sm font-medium">销售经理</span>
+                  <span class="text-sm font-medium">7%</span>
+                </div>
+                <div class="w-full bg-gray-100 rounded-full h-2">
+                  <div class="bg-warning h-2 rounded-full" style="width: 7%"></div>
+                </div>
+              </div>
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-sm font-medium">管理员</span>
+                  <span class="text-sm font-medium">3%</span>
+                </div>
+                <div class="w-full bg-gray-100 rounded-full h-2">
+                  <div class="bg-danger h-2 rounded-full" style="width: 3%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 用户部门分布 -->
+        <div class="card mb-6">
+          <div class="flex items-center justify-between mb-6">
+            <h3 class="font-bold text-gray-800">用户部门分布</h3>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div class="bg-gray-50 rounded-lg p-4">
+              <div class="flex items-center justify-between mb-3">
+                <h4 class="font-medium">销售部</h4>
+                <span class="text-primary font-bold">132</span>
+              </div>
+              <div class="h-32">
+                <canvas id="department-chart-1"></canvas>
+              </div>
+            </div>
+            <div class="bg-gray-50 rounded-lg p-4">
+              <div class="flex items-center justify-between mb-3">
+                <h4 class="font-medium">市场部</h4>
+                <span class="text-secondary font-bold">64</span>
+              </div>
+              <div class="h-32">
+                <canvas id="department-chart-2"></canvas>
+              </div>
+            </div>
+            <div class="bg-gray-50 rounded-lg p-4">
+              <div class="flex items-center justify-between mb-3">
+                <h4 class="font-medium">客服部</h4>
+                <span class="text-warning font-bold">48</span>
+              </div>
+              <div class="h-32">
+                <canvas id="department-chart-3"></canvas>
+              </div>
+            </div>
+            <div class="bg-gray-50 rounded-lg p-4">
+              <div class="flex items-center justify-between mb-3">
+                <h4 class="font-medium">财务部</h4>
+                <span class="text-danger font-bold">26</span>
+              </div>
+              <div class="h-32">
+                <canvas id="department-chart-4"></canvas>
+              </div>
+            </div>
+            <div class="bg-gray-50 rounded-lg p-4">
+              <div class="flex items-center justify-between mb-3">
+                <h4 class="font-medium">技术部</h4>
+                <span class="text-info font-bold">18</span>
+              </div>
+              <div class="h-32">
+                <canvas id="department-chart-5"></canvas>
+              </div>
+            </div>
+            <div class="bg-gray-50 rounded-lg p-4">
+              <div class="flex items-center justify-between mb-3">
+                <h4 class="font-medium">用户数量</h4>
+                <span class="text-gray-600 font-bold">240</span>
+              </div>
+              <div class="h-32">
+                <canvas id="department-chart-6"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 用户列表 -->
+        <div class="card">
+          <div class="flex items-center justify-between mb-6">
+            <h3 class="font-bold text-gray-800">用户列表</h3>
+            <div class="text-sm text-gray-500">共 <span class="font-medium text-primary">528</span> 条数据</div>
+          </div>
+          
+          <div class="overflow-x-auto">
+            <table class="w-full text-left">
+              <thead>
+                <tr class="bg-gray-50">
+                  <th class="px-4 py-3 text-sm font-medium text-gray-600">用户ID</th>
+                  <th class="px-4 py-3 text-sm font-medium text-gray-600">用户信息</th>
+                  <th class="px-4 py-3 text-sm font-medium text-gray-600">所属部门</th>
+                  <th class="px-4 py-3 text-sm font-medium text-gray-600">用户角色</th>
+                  <th class="px-4 py-3 text-sm font-medium text-gray-600">注册时间</th>
+                  <th class="px-4 py-3 text-sm font-medium text-gray-600">状态</th>
+                  <th class="px-4 py-3 text-sm font-medium text-gray-600">操作</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100">
+                <tr class="hover:bg-gray-50 transition-colors duration-150">
+                  <td class="px-4 py-4 text-sm">1001</td>
+                  <td class="px-4 py-4">
+                    <div class="flex items-center gap-3">
+                      <img src="https://picsum.photos/id/1005/100/100" alt="用户头像" class="w-8 h-8 rounded-full object-cover">
+                      <div>
+                        <p class="font-medium">张经理</p>
+                        <p class="text-sm text-gray-500">139****1234</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-4 py-4">销售部</td>
+                  <td class="px-4 py-4">
+                    <span class="badge bg-primary/10 text-primary">销售经理</span>
+                  </td>
+                  <td class="px-4 py-4">
+                    <p>2025-01-15</p>
+                    <p class="text-sm text-gray-500">14:30:25</p>
+                  </td>
+                  <td class="px-4 py-4">
+                    <span class="badge bg-success/10 text-success">正常</span>
+                  </td>
+                  <td class="px-4 py-4">
+                    <div class="flex gap-2">
+                      <button class="text-primary hover:text-primary/80" title="查看详情" @click="openUserDetail(1001)">
+                        <i class="fa fa-eye"></i>
+                      </button>
+                      <button class="text-secondary hover:text-secondary/80" title="编辑用户">
+                        <i class="fa fa-pencil"></i>
+                      </button>
+                      <button class="text-danger hover:text-danger/80" title="停用用户">
+                        <i class="fa fa-user-times"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                <tr class="hover:bg-gray-50 transition-colors duration-150">
+                  <td class="px-4 py-4 text-sm">1002</td>
+                  <td class="px-4 py-4">
+                    <div class="flex items-center gap-3">
+                      <img src="https://picsum.photos/id/1006/100/100" alt="用户头像" class="w-8 h-8 rounded-full object-cover">
+                      <div>
+                        <p class="font-medium">李经理</p>
+                        <p class="text-sm text-gray-500">138****5678</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-4 py-4">销售部</td>
+                  <td class="px-4 py-4">
+                    <span class="badge bg-primary/10 text-primary">销售经理</span>
+                  </td>
+                  <td class="px-4 py-4">
+                    <p>2025-02-18</p>
+                    <p class="text-sm text-gray-500">09:45:12</p>
+                  </td>
+                  <td class="px-4 py-4">
+                    <span class="badge bg-success/10 text-success">正常</span>
+                  </td>
+                  <td class="px-4 py-4">
+                    <div class="flex gap-2">
+                      <button class="text-primary hover:text-primary/80" title="查看详情" @click="openUserDetail(1002)">
+                        <i class="fa fa-eye"></i>
+                      </button>
+                      <button class="text-secondary hover:text-secondary/80" title="编辑用户">
+                        <i class="fa fa-pencil"></i>
+                      </button>
+                      <button class="text-danger hover:text-danger/80" title="停用用户">
+                        <i class="fa fa-user-times"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                <tr class="hover:bg-gray-50 transition-colors duration-150">
+                  <td class="px-4 py-4 text-sm">1003</td>
+                  <td class="px-4 py-4">
+                    <div class="flex items-center gap-3">
+                      <img src="https://picsum.photos/id/1008/100/100" alt="用户头像" class="w-8 h-8 rounded-full object-cover">
+                      <div>
+                        <p class="font-medium">王经理</p>
+                        <p class="text-sm text-gray-500">136****7890</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-4 py-4">市场部</td>
+                  <td class="px-4 py-4">
+                    <span class="badge bg-secondary/10 text-secondary">管理员</span>
+                  </td>
+                  <td class="px-4 py-4">
+                    <p>2025-03-05</p>
+                    <p class="text-sm text-gray-500">16:20:45</p>
+                  </td>
+                  <td class="px-4 py-4">
+                    <span class="badge bg-success/10 text-success">正常</span>
+                  </td>
+                  <td class="px-4 py-4">
+                    <div class="flex gap-2">
+                      <button class="text-primary hover:text-primary/80" title="查看详情" @click="openUserDetail(1003)">
+                        <i class="fa fa-eye"></i>
+                      </button>
+                      <button class="text-secondary hover:text-secondary/80" title="编辑用户">
+                        <i class="fa fa-pencil"></i>
+                      </button>
+                      <button class="text-gray-500 hover:text-gray-700" title="停用用户" disabled>
+                        <i class="fa fa-user-times"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                <tr class="hover:bg-gray-50 transition-colors duration-150">
+                  <td class="px-4 py-4 text-sm">1004</td>
+                  <td class="px-4 py-4">
+                    <div class="flex items-center gap-3">
+                      <img src="https://picsum.photos/id/1012/100/100" alt="用户头像" class="w-8 h-8 rounded-full object-cover">
+                      <div>
+                        <p class="font-medium">赵经理</p>
+                        <p class="text-sm text-gray-500">137****2345</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-4 py-4">客服部</td>
+                  <td class="px-4 py-4">
+                    <span class="badge bg-warning/10 text-warning">销售经理</span>
+                  </td>
+                  <td class="px-4 py-4">
+                    <p>2025-04-12</p>
+                    <p class="text-sm text-gray-500">11:15:30</p>
+                  </td>
+                  <td class="px-4 py-4">
+                    <span class="badge bg-success/10 text-success">正常</span>
+                  </td>
+                  <td class="px-4 py-4">
+                    <div class="flex gap-2">
+                      <button class="text-primary hover:text-primary/80" title="查看详情" @click="openUserDetail(1004)">
+                        <i class="fa fa-eye"></i>
+                      </button>
+                      <button class="text-secondary hover:text-secondary/80" title="编辑用户">
+                        <i class="fa fa-pencil"></i>
+                      </button>
+                      <button class="text-danger hover:text-danger/80" title="停用用户">
+                        <i class="fa fa-user-times"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                <tr class="hover:bg-gray-50 transition-colors duration-150">
+                  <td class="px-4 py-4 text-sm">1005</td>
+                  <td class="px-4 py-4">
+                    <div class="flex items-center gap-3">
+                      <img src="https://picsum.photos/id/1014/100/100" alt="用户头像" class="w-8 h-8 rounded-full object-cover">
+                      <div>
+                        <p class="font-medium">陈经理</p>
+                        <p class="text-sm text-gray-500">135****3456</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-4 py-4">销售部</td>
+                  <td class="px-4 py-4">
+                    <span class="badge bg-primary/10 text-primary">销售经理</span>
+                  </td>
+                  <td class="px-4 py-4">
+                    <p>2025-05-20</p>
+                    <p class="text-sm text-gray-500">08:40:15</p>
+                  </td>
+                  <td class="px-4 py-4">
+                    <span class="badge bg-danger/10 text-danger">停用</span>
+                  </td>
+                  <td class="px-4 py-4">
+                    <div class="flex gap-2">
+                      <button class="text-primary hover:text-primary/80" title="查看详情" @click="openUserDetail(1005)">
+                        <i class="fa fa-eye"></i>
+                      </button>
+                      <button class="text-secondary hover:text-secondary/80" title="编辑用户">
+                        <i class="fa fa-pencil"></i>
+                      </button>
+                      <button class="text-success hover:text-success/80" title="启用用户">
+                        <i class="fa fa-user-plus"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          
+          <!-- 分页 -->
+          <div class="flex flex-col sm:flex-row items-center justify-between mt-6 gap-4">
+            <div class="text-sm text-gray-500">
+              显示 <span class="font-medium">1</span> 到 <span class="font-medium">5</span> 条，共 <span class="font-medium">528</span> 条
+            </div>
+            <div class="flex items-center gap-1">
+              <button class="w-9 h-9 flex items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:border-primary hover:text-primary disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                <i class="fa fa-angle-left"></i>
+              </button>
+              <button class="w-9 h-9 flex items-center justify-center rounded-lg bg-primary text-white">1</button>
+              <button class="w-9 h-9 flex items-center justify-center rounded-lg border border-gray-200 hover:border-primary hover:text-primary">2</button>
+              <button class="w-9 h-9 flex items-center justify-center rounded-lg border border-gray-200 hover:border-primary hover:text-primary">3</button>
+              <button class="w-9 h-9 flex items-center justify-center rounded-lg border border-gray-200 hover:border-primary hover:text-primary">4</button>
+              <button class="w-9 h-9 flex items-center justify-center rounded-lg border border-gray-200 hover:border-primary hover:text-primary">5</button>
+              <button class="w-9 h-9 flex items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:border-primary hover:text-primary">
+                <i class="fa fa-angle-right"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+    
+    <!-- 新增用户模态框 -->
+    <div id="add-user-modal" class="fixed inset-0 z-50 hidden">
+      <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="closeAddUserModal()"></div>
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-4xl bg-white rounded-xl shadow-lg overflow-hidden max-h-[90vh] overflow-y-auto">
+        <div class="p-5 border-b">
+          <div class="flex items-center justify-between">
+            <h3 class="font-bold text-lg">新增用户</h3>
+            <button @click="closeAddUserModal()" class="text-gray-500 hover:text-gray-700">
+              <i class="fa fa-times"></i>
+            </button>
+          </div>
+        </div>
+        
+        <div class="p-5">
+          <form id="add-user-form">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">用户姓名 <span class="text-danger">*</span></label>
+                <input type="text" class="input" placeholder="请输入用户姓名" required>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">手机号码 <span class="text-danger">*</span></label>
+                <input type="tel" class="input" placeholder="请输入手机号码" required>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">用户角色 <span class="text-danger">*</span></label>
+                <select class="input" required>
+                  <option value="">请选择角色</option>
+                  <option value="admin">管理员</option>
+                  <option value="manager">销售经理</option>
+                  <option value="sales">销售人员</option>
+                  <option value="customer">客户</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">所属部门 <span class="text-danger">*</span></label>
+                <select class="input" required>
+                  <option value="">请选择部门</option>
+                  <option value="marketing">市场部</option>
+                  <option value="sales">销售部</option>
+                  <option value="customer_service">客服部</option>
+                  <option value="finance">财务部</option>
+                  <option value="it">技术部</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">电子邮箱</label>
+                <input type="email" class="input" placeholder="请输入电子邮箱">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">用户状态 <span class="text-danger">*</span></label>
+                <select class="input" required>
+                  <option value="active">正常</option>
+                  <option value="inactive">停用</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">登录账号 <span class="text-danger">*</span></label>
+                <input type="text" class="input" placeholder="请输入登录账号" required>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">登录密码 <span class="text-danger">*</span></label>
+                <input type="password" class="input" placeholder="请输入登录密码" required>
+              </div>
+            </div>
+            
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-1">用户头像</label>
+              <div class="border-2 border-dashed border-gray-200 rounded-lg p-6 text-center">
+                <div class="flex flex-col items-center">
+                  <i class="fa fa-user-circle text-3xl text-gray-400 mb-2"></i>
+                  <p class="text-sm text-gray-500 mb-2">拖放图片到此处或点击上传</p>
+                  <p class="text-xs text-gray-400 mb-4">支持 JPG, PNG 格式，最大 2MB</p>
+                  <button type="button" class="btn btn-outline">
+                    <i class="fa fa-plus"></i> 选择图片
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-1">备注信息</label>
+              <textarea class="input" rows="2" placeholder="请输入备注信息（选填）"></textarea>
+            </div>
+            
+            <div class="flex justify-end gap-3 mt-6">
+              <button type="button" class="btn btn-outline" @click="closeAddUserModal()">取消</button>
+              <button type="submit" class="btn btn-primary">创建用户</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 用户详情模态框 -->
+    <div id="user-detail-modal" class="fixed inset-0 z-50 hidden">
+      <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="closeUserDetailModal()"></div>
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-4xl bg-white rounded-xl shadow-lg overflow-hidden max-h-[90vh] overflow-y-auto">
+        <div class="p-5 border-b">
+          <div class="flex items-center justify-between">
+            <h3 class="font-bold text-lg" id="user-detail-title">用户详情 #1001</h3>
+            <button @click="closeUserDetailModal()" class="text-gray-500 hover:text-gray-700">
+              <i class="fa fa-times"></i>
+            </button>
+          </div>
+        </div>
+        
+        <div class="p-5">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <div class="md:col-span-1">
+              <div class="bg-gray-50 rounded-xl p-4 text-center">
+                <img src="https://picsum.photos/id/1005/200/200" alt="用户头像" class="w-32 h-32 rounded-full object-cover mx-auto mb-4">
+                <h4 class="font-bold text-lg mb-1">张经理</h4>
+                <p class="text-primary font-medium mb-3">销售经理</p>
+                <div class="flex justify-center gap-3 mb-4">
+                  <button class="text-primary hover:text-primary/80">
+                    <i class="fa fa-phone"></i>
+                  </button>
+                  <button class="text-primary hover:text-primary/80">
+                    <i class="fa fa-envelope"></i>
+                  </button>
+                  <button class="text-primary hover:text-primary/80">
+                    <i class="fa fa-comment"></i>
+                  </button>
+                </div>
+                <div class="flex justify-between text-sm">
+                  <div>
+                    <p class="text-gray-500">用户ID</p>
+                    <p class="font-medium">1001</p>
+                  </div>
+                  <div>
+                    <p class="text-gray-500">注册时间</p>
+                    <p class="font-medium">2025-01-15</p>
+                  </div>
+                  <div>
+                    <p class="text-gray-500">状态</p>
+                    <p class="font-medium text-success">正常</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="md:col-span-2">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <p class="text-sm text-gray-500 mb-1">姓名</p>
+                  <p class="font-medium">张经理</p>
+                </div>
+                <div>
+                  <p class="text-sm text-gray-500 mb-1">手机号码</p>
+                  <p class="font-medium">139****1234</p>
+                </div>
+                <div>
+                  <p class="text-sm text-gray-500 mb-1">电子邮箱</p>
+                  <p class="font-medium">zhang@example.com</p>
+                </div>
+                <div>
+                  <p class="text-sm text-gray-500 mb-1">用户角色</p>
+                  <p class="font-medium">销售经理</p>
+                </div>
+                <div>
+                  <p class="text-sm text-gray-500 mb-1">所属部门</p>
+                  <p class="font-medium">销售部</p>
+                </div>
+                <div>
+                  <p class="text-sm text-gray-500 mb-1">入职日期</p>
+                  <p class="font-medium">2024-06-01</p>
+                </div>
+                <div>
+                  <p class="text-sm text-gray-500 mb-1">用户状态</p>
+                  <p class="font-medium text-success">正常</p>
+                </div>
+                <div><div>
+                  <p class="text-sm text-gray-500 mb-1">登录账号</p>
+                  <p class="font-medium">zhang</p>
+                </div>
+              </div>
+              
+              <div class="mb-4">
+                <p class="text-sm text-gray-500 mb-1">备注信息</p>
+                <p class="font-medium">高级销售经理，负责华东地区房产销售业务，经验丰富，业绩突出。</p>
+              </div>
+              
+              <div class="flex justify-end gap-3">
+                <button class="btn btn-outline">
+                  <i class="fa fa-print"></i> 打印详情
+                </button>
+                <button class="btn btn-secondary">
+                  <i class="fa fa-pencil"></i> 编辑用户
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <div class="border-t pt-4">
+            <h4 class="font-medium mb-4">本月业绩统计</h4>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div class="bg-gray-50 rounded-lg p-4">
+                <div class="flex items-center justify-between mb-2">
+                  <p class="text-sm text-gray-500">带看次数</p>
+                  <span class="text-primary font-bold">18</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                  <div class="bg-primary h-2 rounded-full" style="width: 75%"></div>
+                </div>
+              </div>
+              <div class="bg-gray-50 rounded-lg p-4">
+                <div class="flex items-center justify-between mb-2">
+                  <p class="text-sm text-gray-500">成交订单</p>
+                  <span class="text-secondary font-bold">5</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                  <div class="bg-secondary h-2 rounded-full" style="width: 60%"></div>
+                </div>
+              </div>
+              <div class="bg-gray-50 rounded-lg p-4">
+                <div class="flex items-center justify-between mb-2">
+                  <p class="text-sm text-gray-500">成交金额</p>
+                  <span class="text-warning font-bold">1250万</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                  <div class="bg-warning h-2 rounded-full" style="width: 85%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // 侧边栏切换
+    document.getElementById('sidebar-toggle').addEventListener('click', toggleSidebar);
+    
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('sidebar-overlay');
+      
+      sidebar.classList.toggle('-translate-x-full');
+      overlay.classList.toggle('hidden');
+    }
+    
+    // 模态框控制
+    const app = Vue.createApp({
+      data() {
+        return {
+          activeTab: 'users',
+          userDetails: {}
+        }
+      },
+      methods: {
+        openAddUserModal() {
+          document.getElementById('add-user-modal').classList.remove('hidden');
+        },
+        closeAddUserModal() {
+          document.getElementById('add-user-modal').classList.add('hidden');
+        },
+        openUserDetail(userId) {
+          // 模拟加载用户数据
+          this.userDetails = {
+            id: userId,
+            name: "张经理",
+            role: "销售经理",
+            department: "销售部",
+            phone: "139****1234",
+            email: "zhang@example.com",
+            status: "正常",
+            registerDate: "2025-01-15",
+            description: "高级销售经理，负责华东地区房产销售业务，经验丰富，业绩突出。"
+          };
+          
+          document.getElementById('user-detail-title').textContent = `用户详情 #${userId}`;
+          document.getElementById('user-detail-modal').classList.remove('hidden');
+        },
+        closeUserDetailModal() {
+          document.getElementById('user-detail-modal').classList.add('hidden');
+        }
+      }
+    }).mount('#app');
+    
+    // 初始化图表
+    document.addEventListener('DOMContentLoaded', function() {
+      // 用户统计图表
+      const userChart1 = new Chart(document.getElementById('user-chart-1'), {
+        type: 'doughnut',
+        data: {
+          labels: ['用户总数'],
+          datasets: [{
+            data: [528],
+            backgroundColor: ['#165DFF'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          cutout: '80%',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              enabled: false
+            }
+          }
+        }
+      });
+      
+      const userChart2 = new Chart(document.getElementById('user-chart-2'), {
+        type: 'doughnut',
+        data: {
+          labels: ['活跃用户'],
+          datasets: [{
+            data: [482],
+            backgroundColor: ['#52C41A'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          cutout: '80%',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              enabled: false
+            }
+          }
+        }
+      });
+      
+      const userChart3 = new Chart(document.getElementById('user-chart-3'), {
+        type: 'doughnut',
+        data: {
+          labels: ['停用用户'],
+          datasets: [{
+            data: [46],
+            backgroundColor: ['#FF4D4F'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          cutout: '80%',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              enabled: false
+            }
+          }
+        }
+      });
+      
+      const userChart4 = new Chart(document.getElementById('user-chart-4'), {
+        type: 'doughnut',
+        data: {
+          labels: ['本月新增'],
+          datasets: [{
+            data: [62],
+            backgroundColor: ['#0FC6C2'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          cutout: '80%',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              enabled: false
+            }
+          }
+        }
+      });
+      
+      // 用户角色分布图表
+      const userRoleChart = new Chart(document.getElementById('user-role-chart'), {
+        type: 'pie',
+        data: {
+          labels: ['客户', '销售人员', '销售经理', '管理员'],
+          datasets: [{
+            data: [343, 132, 37, 16],
+            backgroundColor: ['#165DFF', '#0FC6C2', '#FAAD14', '#FF4D4F'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom'
+            }
+          }
+        }
+      });
+      
+      // 部门图表
+      const departmentChart1 = new Chart(document.getElementById('department-chart-1'), {
+        type: 'bar',
+        data: {
+          labels: ['经理', '销售'],
+          datasets: [{
+            label: '人数',
+            data: [8, 124],
+            backgroundColor: ['#165DFF', '#4080FF'],
+            borderRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            }
+          },
+          scales: {
+            x: {
+              grid: {
+                display: false
+              }
+            },
+            y: {
+              beginAtZero: true,
+              grid: {
+                display: false
+              },
+              ticks: {
+                display: false
+              }
+            }
+          }
+        }
+      });
+      
+      const departmentChart2 = new Chart(document.getElementById('department-chart-2'), {
+        type: 'bar',
+        data: {
+          labels: ['经理', '员工'],
+          datasets: [{
+            label: '人数',
+            data: [4, 60],
+            backgroundColor: ['#165DFF', '#4080FF'],
+            borderRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            }
+          },
+          scales: {
+            x: {
+              grid: {
+                display: false
+              }
+            },
+            y: {
+              beginAtZero: true,
+              grid: {
+                display: false
+              },
+              ticks: {
+                display: false
+              }
+            }
+          }
+        }
+      });
+      
+      const departmentChart3 = new Chart(document.getElementById('department-chart-3'), {
+        type: 'bar',
+        data: {
+          labels: ['主管', '客服'],
+          datasets: [{
+            label: '人数',
+            data: [3, 45],
+            backgroundColor: ['#165DFF', '#4080FF'],
+            borderRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            }
+          },
+          scales: {
+            x: {
+              grid: {
+                display: false
+              }
+            },
+            y: {
+              beginAtZero: true,
+              grid: {
+                display: false
+              },
+              ticks: {
+                display: false
+              }
+            }
+          }
+        }
+      });
+      
+      const departmentChart4 = new Chart(document.getElementById('department-chart-4'), {
+        type: 'bar',
+        data: {
+          labels: ['经理', '员工'],
+          datasets: [{
+            label: '人数',
+            data: [2, 24],
+            backgroundColor: ['#165DFF', '#4080FF'],
+            borderRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            }
+          },
+          scales: {
+            x: {
+              grid: {
+                display: false
+              }
+            },
+            y: {
+              beginAtZero: true,
+              grid: {
+                display: false
+              },
+              ticks: {
+                display: false
+              }
+            }
+          }
+        }
+      });
+      
+      const departmentChart5 = new Chart(document.getElementById('department-chart-5'), {
+        type: 'bar',
+        data: {
+          labels: ['主管', '开发', '测试'],
+          datasets: [{
+            label: '人数',
+            data: [1, 10, 7],
+            backgroundColor: ['#165DFF', '#4080FF', '#6AA1FF'],
+            borderRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            }
+          },
+          scales: {
+            x: {
+              grid: {
+                display: false
+              }
+            },
+            y: {
+              beginAtZero: true,
+              grid: {
+                display: false
+              },
+              ticks: {
+                display: false
+              }
+            }
+          }
+        }
+      });
+      
+      const departmentChart6 = new Chart(document.getElementById('department-chart-6'), {
+        type: 'bar',
+        data: {
+          labels: ['其他用户'],
+          datasets: [{
+            label: '人数',
+            data: [240],
+            backgroundColor: ['#165DFF'],
+            borderRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            }
+          },
+          scales: {
+            x: {
+              grid: {
+                display: false
+              }
+            },
+            y: {
+              beginAtZero: true,
+              grid: {
+                display: false
+              },
+              ticks: {
+                display: false
+              }
+            }
+          }
+        }
+      });
+    });
+    
+    // 表单提交
+    document.getElementById('add-user-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      // 这里添加表单提交逻辑
+      alert('用户创建成功！');
+      document.getElementById('add-user-modal').classList.add('hidden');
+      this.reset();
+    });
+  </script>
+</body>
+</html>
+  

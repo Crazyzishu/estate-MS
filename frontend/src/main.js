@@ -20,6 +20,6 @@ app.use(router)
 app.use(ElementPlus)
 app.provide('echarts', echarts)
 app.provide('axios', axios)
-
+//app.config.globalProperties.$echarts = echarts
 app.mount('#app')
 

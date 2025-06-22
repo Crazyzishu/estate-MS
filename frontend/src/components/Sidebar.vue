@@ -16,7 +16,7 @@
           <el-menu-item index="1-2" @click="navigateTo('/houses')">房源管理</el-menu-item>
           <el-menu-item index="1-3" @click="navigateTo('/clients')">客户管理</el-menu-item>
           <el-menu-item index="1-4" @click="navigateTo('/contracts')">合同管理</el-menu-item>
-          <el-menu-item index="1-5" @click="navigateTo('/estatenews')">楼盘动态</el-menu-item>
+          <!-- <el-menu-item index="1-5" @click="navigateTo('/estatenews')">楼盘动态</el-menu-item> -->
         </el-sub-menu>
         <el-sub-menu index="2">
           <template #title>

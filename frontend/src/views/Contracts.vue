@@ -8,15 +8,15 @@
 
     <!-- 操作按钮 -->
     <div class="action-buttons">
-      <el-button type="primary" @click="toggleContractModal">
-        <el-icon><Plus /></el-icon> 新增合同
-      </el-button>
-      <el-button @click="exportData">
-        <el-icon><Download /></el-icon> 导出数据
-      </el-button>
-      <el-button>
-        <el-icon><Upload /></el-icon> 导入数据
-      </el-button>
+      <el-button type="primary" @click="$router.push('/contracts/new')">
+      <el-icon><Plus /></el-icon> 新增合同
+    </el-button>
+<!--      <el-button @click="exportData">-->
+<!--        <el-icon><Download /></el-icon> 导出数据-->
+<!--      </el-button>-->
+<!--      <el-button>-->
+<!--        <el-icon><Upload /></el-icon> 导入数据-->
+<!--      </el-button>-->
     </div>
 
     <!-- 筛选条件 -->
@@ -87,6 +87,97 @@
           <el-button type="primary" @click="searchContracts">搜索</el-button>
         </div>
       </el-form>
+    </el-card>
+
+    <!-- 合同列表 -->
+    <el-card>
+      <div class="list-header">
+        <h3 class="font-bold text-gray-800">合同列表</h3>
+        <span class="total-count">共 <span class="font-medium text-primary">{{ total }}</span> 条数据</span>
+      </div>
+
+      <el-table :data="contractList" border style="width: 100%" :row-key="getRowKey">
+        <el-table-column type="selection" width="40" />
+
+        <el-table-column prop="id" label="合同编号" width="180" />
+
+        <el-table-column label="客户姓名" width="150">
+          <template #default="scope">
+            {{ scope.row.clientName }}
+          </template>
+        </el-table-column>
+
+        <el-table-column prop="propertyAddress" label="房源地址" min-width="200" />
+
+        <el-table-column label="合同类型" width="120">
+          <template #default="scope">
+            {{ scope.row.contractType }}
+          </template>
+        </el-table-column>
+
+        <el-table-column label="签约日期" width="120">
+          <template #default="scope">
+            {{ scope.row.signDate }}
+          </template>
+        </el-table-column>
+
+        <el-table-column label="金额" width="150">
+          <template #default="scope">
+            <span class="font-medium text-primary">{{ formatCurrency(scope.row.amount) }}</span>
+          </template>
+        </el-table-column>
+
+        <el-table-column label="状态" width="120">
+          <template #default="scope">
+            <el-tag
+                :type="getContractStatusTagType(scope.row.status)"
+                size="small"
+            >
+              {{ scope.row.status }}
+            </el-tag>
+          </template>
+        </el-table-column>
+
+        <el-table-column label="操作" width="200">
+          <template #default="scope">
+<!--            <el-button-->
+<!--                size="small"-->
+<!--                icon="View"-->
+<!--                plain-->
+<!--                @click="openContractDetail(scope.row.id)"-->
+<!--            >查看详情</el-button>-->
+            <el-button
+                size="small"
+                icon="Edit"
+                plain
+            >编辑</el-button>
+            <el-button
+                size="small"
+                icon="Delete"
+                plain
+                @click="deleteContract(scope.row.id)"
+            >删除</el-button>
+<!--            <el-button-->
+<!--                size="small"-->
+<!--                icon="Download"-->
+<!--                plain-->
+<!--            >下载</el-button>-->
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <!-- 分页 -->
+      <div class="pagination">
+        <el-pagination
+            v-model:current-page="currentPage"
+            v-model:page-size="pageSize"
+            :page-sizes="[5, 10, 20]"
+            layout="sizes, prev, pager, next"
+            :total="total"
+            @size-change="handleSizeChange"
+            @current-change="handleCurrentChange"
+        />
+      </div>
     </el-card>
 
     <!-- 合同统计卡片 -->
@@ -188,96 +279,7 @@
       </div>
     </el-card>
 
-    <!-- 合同列表 -->
-    <el-card>
-      <div class="list-header">
-        <h3 class="font-bold text-gray-800">合同列表</h3>
-        <span class="total-count">共 <span class="font-medium text-primary">{{ total }}</span> 条数据</span>
-      </div>
 
-      <el-table :data="contractList" border style="width: 100%" :row-key="getRowKey">
-        <el-table-column type="selection" width="40" />
-
-        <el-table-column prop="id" label="合同编号" width="180" />
-
-        <el-table-column label="客户姓名" width="150">
-          <template #default="scope">
-            {{ scope.row.clientName }}
-          </template>
-        </el-table-column>
-
-        <el-table-column prop="propertyAddress" label="房源地址" min-width="200" />
-
-        <el-table-column label="合同类型" width="120">
-          <template #default="scope">
-            {{ scope.row.contractType }}
-          </template>
-        </el-table-column>
-
-        <el-table-column label="签约日期" width="120">
-          <template #default="scope">
-            {{ scope.row.signDate }}
-          </template>
-        </el-table-column>
-
-        <el-table-column label="金额" width="150">
-          <template #default="scope">
-            <span class="font-medium text-primary">{{ formatCurrency(scope.row.amount) }}</span>
-          </template>
-        </el-table-column>
-
-        <el-table-column label="状态" width="120">
-          <template #default="scope">
-            <el-tag 
-              :type="getContractStatusTagType(scope.row.status)"
-              size="small"
-            >
-              {{ scope.row.status }}
-            </el-tag>
-          </template>
-        </el-table-column>
-
-        <el-table-column label="操作" width="200">
-          <template #default="scope">
-            <el-button 
-              size="small" 
-              icon="View" 
-              plain
-              @click="openContractDetail(scope.row.id)"
-            >查看详情</el-button>
-            <el-button 
-              size="small" 
-              icon="Edit" 
-              plain
-            >编辑</el-button>
-            <el-button 
-              size="small" 
-              icon="Delete" 
-              plain
-              @click="deleteContract(scope.row.id)"
-            >删除</el-button>
-            <el-button 
-              size="small" 
-              icon="Download" 
-              plain
-            >下载</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
-
-      <!-- 分页 -->
-      <div class="pagination">
-        <el-pagination
-          v-model:current-page="currentPage"
-          v-model:page-size="pageSize"
-          :page-sizes="[5, 10, 20]"
-          layout="sizes, prev, pager, next"
-          :total="total"
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-        />
-      </div>
-    </el-card>
 
     <!-- 合同录入模态框 -->
     <el-dialog
@@ -791,19 +793,22 @@ const handleCurrentChange = (pageNum) => {
 // 数据加载
 const fetchContracts = async () => {
   try {
-    // 这里应该使用实际API获取数据
-    // 示例：const response = await axios.get('/api/contracts', { params: { ...filters, page: currentPage.value, limit: pageSize.value } });
-    // contractList.value = response.data.items
-    // total.value = response.data.total
-    
-    // 由于没有实际API，我们模拟分页
-    // 在实际项目中应替换为真实的API调用
-    ElMessage.info(`正在查询第${currentPage.value}页，每页${pageSize.value}条`)
+    const res = await axios.get('/api/contracts');
+    contractList.value = res.data.map(item => ({
+      contractId: item.contract_id,
+      clientId: item.client_id,
+      houseId: item.house_id,
+      managerId: item.manager_id,
+      totalAmount: item.total_amount,
+      paymentPlan: item.payment_plan,
+      signTime: item.sign_time,
+      status: item.status,
+      contractFile: item.contract_file
+    }));
   } catch (error) {
-    ElMessage.error('合同数据加载失败')
-    console.error(error)
+    console.error('Failed to fetch contracts:', error);
   }
-}
+};
 
 // 下载合同
 const downloadContract = (contractId) => {

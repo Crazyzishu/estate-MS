@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.zishu.mapper.DashboardMapper">
+
+    <!-- 获取首页概览卡片数据 -->
+    <select id="getDashboardCards" resultType="map">
+        WITH monthly_house_count AS (
+            SELECT
+                COUNT(*) AS current_month,
+                COUNT(CASE WHEN created_at >= DATE_SUB(DATE_FORMAT(NOW(), '%Y-%m-01'), INTERVAL 1 MONTH)
+                    AND created_at &lt; DATE_FORMAT(NOW(), '%Y-%m-01') THEN 1 END) AS last_month
+            FROM houses
+        ),
+             monthly_client_count AS (
+                 SELECT
+                     COUNT(*) AS current_month,
+                     COUNT(CASE WHEN created_at >= DATE_SUB(DATE_FORMAT(NOW(), '%Y-%m-01'), INTERVAL 1 MONTH)
+                         AND created_at &lt; DATE_FORMAT(NOW(), '%Y-%m-01') THEN 1 END) AS last_month
+                 FROM clients
+             ),
+             monthly_appointment_count AS (
+                 SELECT
+                     COUNT(*) AS current_month,
+                     COUNT(CASE WHEN visit_time >= DATE_SUB(DATE_FORMAT(NOW(), '%Y-%m-01'), INTERVAL 1 MONTH)
+                         AND visit_time &lt; DATE_FORMAT(NOW(), '%Y-%m-01') THEN 1 END) AS last_month
+                 FROM appointments
+                 WHERE status = '待确认'
+             )
+        SELECT
+                (SELECT COUNT(*) FROM houses) AS totalHouses,
+                (SELECT SUM(price) FROM purchase_intents
+                 WHERE DATE_FORMAT(created_at, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m')) AS monthlySales,
+                (SELECT COUNT(*) FROM clients) AS totalClients,
+                (SELECT COUNT(*) FROM appointments WHERE status = '待确认') AS pendingAppointments,
+
+                -- 房源环比增长（处理 NULL 情况）
+                COALESCE(ROUND(
+                                 ((SELECT current_month FROM monthly_house_count) -
+                                  (SELECT last_month FROM monthly_house_count)) /
+                                 NULLIF((SELECT last_month FROM monthly_house_count), 0) * 100, 2), 0.00) AS houseGrowthRate,
+
+                -- 客户环比增长
+                COALESCE(ROUND(
+                                 ((SELECT current_month FROM monthly_client_count) -
+                                  (SELECT last_month FROM monthly_client_count)) /
+                                 NULLIF((SELECT last_month FROM monthly_client_count), 0) * 100, 2), 0.00) AS clientGrowthRate,
+
+                -- 预约看房环比增长
+                COALESCE(ROUND(
+                                 ((SELECT current_month FROM monthly_appointment_count) -
+                                  (SELECT last_month FROM monthly_appointment_count)) /
+                                 NULLIF((SELECT last_month FROM monthly_appointment_count), 0) * 100, 2), 0.00) AS appointmentGrowthRate
+    </select>
+
+<!--    &lt;!&ndash; 销售趋势图 &ndash;&gt;-->
+<!--    <select id="getSalesTrend" resultType="map">-->
+<!--        SELECT-->
+<!--            DATE_FORMAT(sign_time,-->
+<!--                        CASE #{timeRange}-->
+<!--                            WHEN 'month' THEN '%c月'-->
+<!--                            WHEN 'quarter' THEN CONCAT('第', QUARTER(sign_time), '季度')-->
+<!--                            WHEN 'year' THEN '%Y年'-->
+<!--                            END) AS month,-->
+<!--            SUM(total_amount) AS salesAmount-->
+<!--        FROM contracts-->
+<!--        WHERE status = '已签约'-->
+<!--          AND sign_time >=-->
+<!--              CASE #{timeRange}-->
+<!--                  WHEN 'month' THEN DATE_FORMAT(NOW(), '%Y-%m-01')-->
+<!--                  WHEN 'quarter' THEN-->
+<!--                      CASE QUARTER(NOW())-->
+<!--                          WHEN 1 THEN MAKEDATE(YEAR(NOW()), 1) + INTERVAL 0 QUARTER-->
+<!--                          WHEN 2 THEN MAKEDATE(YEAR(NOW()), 1) + INTERVAL 1 QUARTER-->
+<!--                          WHEN 3 THEN MAKEDATE(YEAR(NOW()), 1) + INTERVAL 2 QUARTER-->
+<!--                          WHEN 4 THEN MAKEDATE(YEAR(NOW()), 1) + INTERVAL 3 QUARTER-->
+<!--                          END-->
+<!--                  WHEN 'year' THEN MAKEDATE(YEAR(NOW()), 1)-->
+<!--                  END-->
+<!--        GROUP BY DATE_FORMAT(sign_time,-->
+<!--                             CASE #{timeRange}-->
+<!--                                 WHEN 'month' THEN '%c月'-->
+<!--                                 WHEN 'quarter' THEN CONCAT('第', QUARTER(sign_time), '季度')-->
+<!--                                 WHEN 'year' THEN '%Y年'-->
+<!--                                 END)-->
+<!--        ORDER BY DATE_FORMAT(sign_time,-->
+<!--                             CASE #{timeRange}-->
+<!--                                 WHEN 'month' THEN '%c月'-->
+<!--                                 WHEN 'quarter' THEN CONCAT('第', QUARTER(sign_time), '季度')-->
+<!--                                 WHEN 'year' THEN '%Y年'-->
+<!--                                 END) ASC-->
+<!--    </select>-->
+
+    <!-- 销售趋势图 -->
+<!--    <select id="getSalesTrend" resultType="map">-->
+<!--        SELECT-->
+<!--            CASE #{timeRange}-->
+<!--                WHEN 'month' THEN DATE(sign_time)-->
+<!--                WHEN 'quarter' THEN DATE_FORMAT(sign_time, '%Y-%m')-->
+<!--                WHEN 'year' THEN DATE_FORMAT(sign_time, '%Y-%m')-->
+<!--                END AS date,-->
+<!--            COALESCE(SUM(total_amount), 0.0) AS salesAmount-->
+<!--        FROM contracts-->
+<!--        WHERE status = '已签约'-->
+<!--          AND sign_time IS NOT NULL-->
+<!--          AND sign_time >=-->
+<!--              CASE #{timeRange}-->
+<!--                  WHEN 'month' THEN DATE_FORMAT(NOW(), '%Y-%m-01')-->
+<!--                  WHEN 'quarter' THEN-->
+<!--                      CASE QUARTER(NOW())-->
+<!--                          WHEN 1 THEN STR_TO_DATE(CONCAT(YEAR(NOW()), '-01-01'), '%Y-%m-%d')-->
+<!--                          WHEN 2 THEN STR_TO_DATE(CONCAT(YEAR(NOW()), '-04-01'), '%Y-%m-%d')-->
+<!--                          WHEN 3 THEN STR_TO_DATE(CONCAT(YEAR(NOW()), '-07-01'), '%Y-%m-%d')-->
+<!--                          WHEN 4 THEN STR_TO_DATE(CONCAT(YEAR(NOW()), '-10-01'), '%Y-%m-%d')-->
+<!--                          END-->
+<!--                  WHEN 'year' THEN MAKEDATE(YEAR(NOW()), 1)-->
+<!--                  END-->
+<!--        GROUP BY-->
+<!--            CASE #{timeRange}-->
+<!--                WHEN 'month' THEN DATE(sign_time)-->
+<!--                WHEN 'quarter' THEN DATE_FORMAT(sign_time, '%Y-%m')-->
+<!--                WHEN 'year' THEN DATE_FORMAT(sign_time, '%Y-%m')-->
+<!--                END-->
+<!--        ORDER BY-->
+<!--            CASE #{timeRange}-->
+<!--                WHEN 'month' THEN DATE(sign_time)-->
+<!--                WHEN 'quarter' THEN DATE_FORMAT(sign_time, '%Y-%m')-->
+<!--                WHEN 'year' THEN DATE_FORMAT(sign_time, '%Y-%m')-->
+<!--                END ASC-->
+<!--    </select>-->
+    <select id="getSalesTrend" resultType="map">
+        SELECT
+            CASE #{timeRange}
+                WHEN 'month' THEN DATE(sign_time)
+                WHEN 'quarter' THEN DATE_FORMAT(sign_time, '%Y-%m')
+                WHEN 'year' THEN DATE_FORMAT(sign_time, '%Y-%m')
+                END AS date,
+            COALESCE(SUM(total_amount), 0.0) AS salesAmount
+        FROM contracts
+        WHERE status = '已签约'
+          AND sign_time IS NOT NULL
+          AND sign_time >=
+              CASE #{timeRange}
+                  WHEN 'month' THEN DATE_FORMAT(NOW(), '%Y-%m-01')
+                  WHEN 'quarter' THEN
+                      CASE QUARTER(NOW())
+                          WHEN 1 THEN STR_TO_DATE(CONCAT(YEAR(NOW()), '-01-01'), '%Y-%m-%d')
+                          WHEN 2 THEN STR_TO_DATE(CONCAT(YEAR(NOW()), '-04-01'), '%Y-%m-%d')
+                          WHEN 3 THEN STR_TO_DATE(CONCAT(YEAR(NOW()), '-07-01'), '%Y-%m-%d')
+                          WHEN 4 THEN STR_TO_DATE(CONCAT(YEAR(NOW()), '-10-01'), '%Y-%m-%d')
+                          END
+                  WHEN 'year' THEN MAKEDATE(YEAR(NOW()), 1)
+                  END
+        GROUP BY
+            CASE #{timeRange}
+                WHEN 'month' THEN DATE(sign_time)
+                WHEN 'quarter' THEN DATE_FORMAT(sign_time, '%Y-%m')
+                WHEN 'year' THEN DATE_FORMAT(sign_time, '%Y-%m')
+                END
+        ORDER BY
+            CASE #{timeRange}
+                WHEN 'month' THEN DATE(sign_time)
+                WHEN 'quarter' THEN DATE_FORMAT(sign_time, '%Y-%m')
+                WHEN 'year' THEN DATE_FORMAT(sign_time, '%Y-%m')
+                END ASC
+    </select>
+
+
+
+
+
+    <!-- 房源户型分布 -->
+    <select id="getHouseRoomTypeDistribution" resultType="map">
+        SELECT room_type AS typeName, COUNT(*) AS count
+        FROM houses
+        GROUP BY room_type
+    </select>
+
+
+    <!-- 最近房源 -->
+    <select id="getRecentHouses" resultType="map">
+        SELECT house_id, address, price, area, status, image_url
+        FROM houses h
+        LEFT JOIN house_images hi ON h.house_id = hi.house_id AND hi.is_main = true
+        ORDER BY h.created_at DESC LIMIT 4
+    </select>
+
+    <!-- 近期预约（包含客户姓名、预约楼盘、预约状态） -->
+    <select id="getRecentAppointments" resultType="map">
+        SELECT
+            c.name,
+            a.visit_time AS time,
+            h.address AS property,
+            a.status
+        FROM appointments a
+        JOIN clients c ON a.client_id = c.client_id
+        JOIN houses h ON a.house_id = h.house_id
+        ORDER BY a.visit_time DESC LIMIT 4
+    </select>
+</mapper>

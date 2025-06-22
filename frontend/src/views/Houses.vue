@@ -1,3 +1,209 @@
+<script setup>
+import { ref, onMounted, reactive } from 'vue';
+import { ElMessage,ElMessageBox } from 'element-plus';
+import {queryPageApi,addHouseApi,queryInfoApi,updateHouseApi,deleteHouseApi} from '../api/house';
+
+// 钩子函数,初始化加载数据
+onMounted(() => {
+  search();
+});
+
+// 搜索表单对象
+const searchHouse = ref({
+  addressKeyword: '',
+  minPrice: '0',
+  maxPrice: '50000',
+  status: ''
+});
+
+// 房源列表
+const houseList = ref([]);
+
+// 分页
+const currentPage = ref(1);//页码
+const pageSize = ref(5);//每页展示记录数
+const total = ref(0);//总记录数
+
+//查询房源信息
+const search= async () => { 
+  const result= await queryPageApi
+  (
+  searchHouse.value.addressKeyword,
+  searchHouse.value.minPrice,
+  searchHouse.value.maxPrice,
+  searchHouse.value.status,
+  currentPage.value,
+  pageSize.value
+);
+if(result.code){
+  total.value=result.data.total;
+  houseList.value=result.data.rows;
+}
+};
+
+
+
+//清空
+const clear=() => { 
+  searchHouse.value = {
+    addressKeyword: '',
+    minPrice: 0,
+    maxPrice: 50000,
+    status: ''
+  }
+  search();
+};
+
+
+
+
+
+// 房源表单相关
+const dialogVisible = ref(false);
+const dialogTitle = ref('房源录入');
+
+// 房源详情相关
+const isHouseDetailOpen = ref(false);
+const currentHouseId = ref('');
+const currentHouseDetails = ref({});
+const showImageViewer = ref(false);
+const currentImageIndex = ref(0);
+
+// 获取行的唯一标识
+const getRowKey = (row) => row.id;
+
+// 格式化数字
+const formatNumber = (number) => {
+  if (!number) return '0';
+  return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+};
+
+// 表格操作
+const openHouseDetail = async (houseId) => {
+  const result = await queryInfoApi(houseId);
+  if (result.code) {
+    currentHouseDetails.value = result.data;
+    currentHouseId.value = houseId;
+    isHouseDetailOpen.value = true;
+  }else{
+    ElMessage.error('获取房源信息失败！');
+  }
+};
+
+const editHouse = async (houseId) => {
+  const result = await queryInfoApi(houseId);
+  console.log('API 返回结果:', result); // 添加调试日志
+  if (result.code) {
+    dialogVisible.value = true;
+    dialogTitle.value = '修改房源信息';
+    house.value = result.data;
+  } else {
+    ElMessage.error('查询客户信息失败！');
+  }
+};
+
+const deleteHouse = (houseId) => {
+  ElMessageBox.confirm('确定要删除该房源吗？', '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  }).then(async () => {
+    // 用户点击确定，调用删除接口
+    const result = await deleteHouseApi(houseId);
+    if (result.code) {
+      ElMessage.success('删除成功');
+      search(); // 刷新列表
+    } else {
+      ElMessage.error('删除失败');
+    }
+  }).catch(() => {
+    // 用户点击取消，不做任何操作
+    ElMessage.info('已取消删除');
+  });
+};
+
+// 模态框操作
+const toggleHouseModal = () => {
+  dialogTitle.value = '房源录入'
+  dialogVisible.value = !dialogVisible.value;
+  if (!dialogVisible.value) {
+    resetForm();
+  }
+};
+
+const resetForm = () => {
+  house.value = {
+    type: '住宅',
+    address: '',
+    price: null,
+    area: null,
+    roomType: '',
+    managerId: null,
+    description: '',
+    images: ''
+  };
+  dialogVisible.value = !dialogVisible.value;
+};
+
+const house = ref({
+  houseId: null,
+  type: '住宅',
+  address: '',
+  price: null,
+  area: null,
+  roomType: '',
+  managerId: null,
+  description: '',
+  images: ''
+})
+
+const save = async () => {
+  if(house.value.houseId){
+    const result=await updateHouseApi(house.value);
+    if (result.code) {//成功
+    ElMessage.success('保存成功');
+    dialogVisible.value = false;
+    search();
+  } else {//失败
+    ElMessage.error('保存失败');
+  }
+  }else{ 
+    const result= await addHouseApi(house.value);
+    if (result.code) {//成功
+    ElMessage.success('保存成功');
+    dialogVisible.value = false;
+    search();
+  } else {//失败
+    ElMessage.error('保存失败');
+  }
+  }
+  
+  
+};
+
+// 文件上传
+const handleRemove = (file, fileList) => {
+  console.log('文件移除', file, fileList);
+};
+
+const handlePictureCardPreview = (file) => {
+  currentImageIndex.value = currentHouseDetails.value.images.indexOf(file.url);
+  showImageViewer.value = true;
+};
+
+// 分页操作
+const handleSizeChange = (newSize) => {
+  pageSize.value = newSize;
+  search();
+};
+
+const handleCurrentChange = (pageNum) => {
+  currentPage.value = pageNum;
+  search();
+};
+
+
+</script>
 <template>
   <div class="houses-container">
     <!-- 页面标题 -->
@@ -19,25 +225,25 @@
       </el-button>
     </div>
 
-    <!-- 筛选条件 -->
+    <!-- 搜索栏 -->
     <el-card class="filter-card">
-      <el-form :model="filters" label-width="90px" label-position="left">
+      <el-form :model="searchHouse" label-width="90px" label-position="left">
         <el-row :gutter="20">
           <el-col :span="8">
             <el-form-item label="地址关键词">
-              <el-input v-model="filters.addressKeyword" placeholder="请输入地址关键词" />
+              <el-input v-model="searchHouse.addressKeyword" placeholder="请输入地址关键词" />
             </el-form-item>
           </el-col>
           <el-col :span="8">
             <el-form-item label="价格区间">
-              <el-input-number v-model="filters.minPrice" :controls="false" placeholder="最低价" />
+              <el-input-number v-model="searchHouse.minPrice" :controls="false" placeholder="最低价" />
               <span class="price-range-separator">-</span>
-              <el-input-number v-model="filters.maxPrice" :controls="false" placeholder="最高价" />
+              <el-input-number v-model="searchHouse.maxPrice" :controls="false" placeholder="最高价" />
             </el-form-item>
           </el-col>
           <el-col :span="8">
             <el-form-item label="房源状态">
-              <el-select v-model="filters.status" placeholder="请选择">
+              <el-select v-model="searchHouse.status" placeholder="请选择">
                 <el-option label="全部" value="" />
                 <el-option label="待审核" value="待审核" />
                 <el-option label="在售" value="在售" />
@@ -47,8 +253,8 @@
           </el-col>
         </el-row>
         <div class="filter-actions">
-          <el-button @click="resetFilters">重置</el-button>
-          <el-button type="primary" @click="searchHouses">搜索</el-button>
+          <el-button @click="clear">重置</el-button>
+          <el-button type="primary" @click="search">搜索</el-button>
         </div>
       </el-form>
     </el-card>
@@ -63,18 +269,9 @@
       <el-table :data="houseList" border style="width: 100%" :row-key="getRowKey">
         <el-table-column type="selection" width="40" />
         
-        <el-table-column prop="id" label="房源ID" width="150" />
+        <el-table-column prop="houseId" label="房源ID" width="50" />
         
-        <el-table-column label="名称" width="200">
-          <template #default="scope">
-            <div class="house-info">
-              <el-image :src="scope.row.image" class="house-image" />
-              <span>{{ scope.row.name }}</span>
-            </div>
-          </template>
-        </el-table-column>
-        
-        <el-table-column prop="address" label="地址" />
+        <el-table-column prop="address" label="地址" width="250" />
         
         <el-table-column prop="price" label="价格" width="120">
           <template #default="scope">
@@ -89,8 +286,10 @@
         </el-table-column>
         
         <el-table-column prop="roomType" label="户型" width="120" />
+
+        <el-table-column prop="description" label="描述" width="200"></el-table-column>
         
-        <el-table-column label="状态" width="100">
+        <el-table-column prop="status" label="状态" width="100">
           <template #default="scope">
             <el-tag 
               :type="scope.row.status === '在售' ? 'success' : 
@@ -102,25 +301,28 @@
           </template>
         </el-table-column>
         
-        <el-table-column label="操作" width="150">
+        <el-table-column label="操作">
           <template #default="scope">
             <el-button 
               size="small" 
               icon="View" 
-              @click="openHouseDetail(scope.row.id)"
+              @click="openHouseDetail(scope.row.houseId)"
               plain
-            />
+            >详情</el-button>
             <el-button 
               size="small" 
               icon="Edit" 
+              type="primary"
+              @click="editHouse(scope.row.houseId)"
               plain
-            />
+            >编辑</el-button>
             <el-button 
               size="small" 
               icon="Delete" 
+              type="danger"
               plain
-              @click="deleteHouse(scope.row.id)"
-            />
+              @click="deleteHouse(scope.row.houseId)"
+            >删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -139,18 +341,18 @@
       </div>
     </el-card>
 
-    <!-- 房源录入模态框 -->
+    <!-- 房源录入/房源修改的对话框 -->
     <el-dialog
-      v-model="isHouseModalOpen"
-      title="房源录入"
+      v-model="dialogVisible"
+      :title="dialogTitle"
       width="60%"
-      :before-close="handleClose"
+      :before-close="resetForm"
     >
-      <el-form :model="currentHouse" label-width="120px">
+      <el-form :model="house" label-width="120px">
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="房源类型">
-              <el-select v-model="currentHouse.type" placeholder="请选择">
+              <el-select v-model="house.type" placeholder="请选择">
                 <el-option label="住宅" value="住宅" />
                 <el-option label="商业" value="商业" />
                 <el-option label="租赁" value="租赁" />
@@ -159,7 +361,7 @@
           </el-col>
           <el-col :span="12">
             <el-form-item label="房源地址">
-              <el-input v-model="currentHouse.address" />
+              <el-input v-model="house.address" />
             </el-form-item>
           </el-col>
         </el-row>
@@ -167,12 +369,12 @@
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="价格 (元)">
-              <el-input-number v-model="currentHouse.price" :controls="false" />
+              <el-input-number v-model="house.price" :controls="false" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
             <el-form-item label="面积 (㎡)">
-              <el-input-number v-model="currentHouse.area" :controls="false" />
+              <el-input-number v-model="house.area" :controls="false" />
             </el-form-item>
           </el-col>
         </el-row>
@@ -180,32 +382,34 @@
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="户型">
-              <el-input v-model="currentHouse.roomType" />
+              <el-input v-model="house.roomType" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
             <el-form-item label="负责销售人员ID">
-              <el-input-number v-model="currentHouse.salespersonId" :controls="false" />
+              <el-input-number v-model="house.managerId" :controls="false" />
             </el-form-item>
           </el-col>
         </el-row>
 
         <el-form-item label="房源描述">
-          <el-input v-model="currentHouse.description" type="textarea" :rows="3" />
+          <el-input v-model="house.description" type="textarea" :rows="3" />
         </el-form-item>
 
         <el-form-item label="房源图片">
           <el-upload
+            v-model="house.images"
             action="#"
             list-type="picture-card"
             :auto-upload="false"
             :on-preview="handlePictureCardPreview"
             :on-remove="handleRemove"
           >
-            <!-- <el-button size="small">
-              <el-icon><Plus /></el-icon> 点击上传
-            </el-button> -->
+            
             <template #default>
+              <el-button size="small">
+              <el-icon><Plus /></el-icon> 点击上传
+            </el-button>
               <i class="el-icon-plus"></i>
             </template>
           </el-upload>
@@ -215,9 +419,9 @@
 
       <template #footer>
         <div class="dialog-footer">
-          <el-button @click="isHouseModalOpen = false">取消</el-button>
-          <el-button type="primary" @click="saveHouse">
-            {{ currentHouse.id ? '保存修改' : '提交' }}
+          <el-button @click="resetForm">取消</el-button>
+          <el-button type="primary" @click="save">
+            {{ house.houseId ? '保存' : '提交' }}
           </el-button>
         </div>
       </template>
@@ -233,10 +437,10 @@
       <div class="house-detail">
         <div class="detail-section">
           <h4 class="section-title">基本信息</h4>
-          <div class="detail-row">
+          <!-- <div class="detail-row">
             <span class="label">名称：</span>
             <span>{{ currentHouseDetails.name }}</span>
-          </div>
+          </div> -->
           <div class="detail-row">
             <span class="label">地址：</span>
             <span>{{ currentHouseDetails.address }}</span>
@@ -253,10 +457,10 @@
             <span class="label">户型：</span>
             <span>{{ currentHouseDetails.roomType }}</span>
           </div>
-          <div class="detail-row">
+          <!-- <div class="detail-row">
             <span class="label">朝向：</span>
             <span>{{ currentHouseDetails.orientation || '南北通透' }}</span>
-          </div>
+          </div> -->
         </div>
 
         <div class="detail-section">
@@ -342,208 +546,6 @@
     />
   </div>
 </template>
-
-<script setup>
-import { ref, onMounted, reactive } from 'vue';
-import { ElMessage } from 'element-plus';
-import axios from 'axios';
-
-// 过滤器
-const filters = reactive({
-  addressKeyword: '',
-  minPrice: null,
-  maxPrice: null,
-  status: ''
-});
-
-// 分页
-const currentPage = ref(1);
-const pageSize = ref(5);
-const total = ref(248);
-
-// 房源列表
-const houseList = ref([
-  {
-    id: '#20250615001',
-    name: '朝阳区XX小区',
-    address: '朝阳区XX路XX号',
-    price: 12000000,
-    area: 120,
-    roomType: '3室2厅1卫',
-    type: '住宅',
-    status: '在售',
-    image: 'https://picsum.photos/id/1040/100/100'
-  },
-  {
-    id: '#20250615002',
-    name: '海淀区XX花园',
-    address: '海淀区XX路XX号',
-    price: 15800000,
-    area: 150,
-    roomType: '4室2厅2卫',
-    type: '住宅',
-    status: '待审核',
-    image: 'https://picsum.photos/id/1067/100/100'
-  },
-  {
-    id: '#20250615003',
-    name: '东城区XX大厦',
-    address: '东城区XX路XX号',
-    price: 22500000,
-    area: 200,
-    roomType: '整层',
-    type: '商业',
-    status: '已售',
-    image: 'https://picsum.photos/id/164/100/100'
-  },
-  {
-    id: '#20250615004',
-    name: '西城区XX公寓',
-    address: '西城区XX路XX号',
-    price: 9600000,
-    area: 90,
-    roomType: '2室1厅1卫',
-    type: '住宅',
-    status: '在售',
-    image: 'https://picsum.photos/id/1048/100/100'
-  },
-  {
-    id: '#20250615005',
-    name: '丰台区XX别墅',
-    address: '丰台区XX路XX号',
-    price: 35000000,
-    area: 350,
-    roomType: '5室3厅3卫',
-    type: '住宅',
-    status: '在售',
-    image: 'https://picsum.photos/id/1076/100/100'
-  }
-]);
-
-// 房源表单相关
-const isHouseModalOpen = ref(false);
-const currentHouse = ref({
-  id: null,
-  type: '住宅',
-  address: '',
-  price: null,
-  area: null,
-  roomType: '',
-  salespersonId: null,
-  description: '',
-  images: []
-});
-
-// 房源详情相关
-const isHouseDetailOpen = ref(false);
-const currentHouseId = ref('');
-const currentHouseDetails = ref({});
-const showImageViewer = ref(false);
-const currentImageIndex = ref(0);
-
-// 获取行的唯一标识
-const getRowKey = (row) => row.id;
-
-// 格式化数字
-const formatNumber = (number) => {
-  if (!number) return '0';
-  return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-};
-
-// 表格操作
-const openHouseDetail = (houseId) => {
-  const house = houseList.value.find(house => house.id === houseId);
-  if (house) {
-    currentHouseDetails.value = {...house};
-    currentHouseId.value = houseId;
-    isHouseDetailOpen.value = true;
-  }
-};
-
-const editHouse = (houseId) => {
-  const house = houseList.value.find(h => h.id === houseId);
-  if (house) {
-    currentHouse.value = {...house};
-    isHouseModalOpen.value = true;
-  }
-};
-
-const deleteHouse = (houseId) => {
-  ElMessage.success('房源删除成功！'); // 实际使用时应替换为真实API调用
-};
-
-// 模态框操作
-const toggleHouseModal = () => {
-  isHouseModalOpen.value = !isHouseModalOpen.value;
-  if (!isHouseModalOpen.value) {
-    resetForm();
-  }
-};
-
-const resetForm = () => {
-  currentHouse.value = {
-    id: null,
-    type: '住宅',
-    address: '',
-    price: null,
-    area: null,
-    roomType: '',
-    salespersonId: null,
-    description: '',
-    images: []
-  };
-};
-
-const saveHouse = () => {
-  ElMessage.success(currentHouse.value.id ? '房源信息更新成功！' : '房源信息提交成功！');
-  toggleHouseModal();
-  fetchHouses(); // 刷新房源列表
-};
-
-// 文件上传
-const handleRemove = (file, fileList) => {
-  console.log('文件移除', file, fileList);
-};
-
-const handlePictureCardPreview = (file) => {
-  currentImageIndex.value = currentHouseDetails.value.images.indexOf(file.url);
-  showImageViewer.value = true;
-};
-
-// 分页操作
-const handleSizeChange = (newSize) => {
-  pageSize.value = newSize;
-  fetchHouses();
-};
-
-const handleCurrentChange = (pageNum) => {
-  currentPage.value = pageNum;
-  fetchHouses();
-};
-
-// 数据加载
-const fetchHouses = async () => {
-  try {
-    // 这里应该使用实际API获取数据
-    // 示例：const response = await axios.get('/api/houses', { params: { ...filters, page: currentPage.value, limit: pageSize.value } });
-    // houseList.value = response.data.items;
-    // total.value = response.data.total;
-    
-    // 由于没有实际API，我们模拟分页
-    // 在实际项目中应替换为真实的API调用
-    ElMessage.info(`正在查询第${currentPage.value}页，每页${pageSize.value}条`);
-  } catch (error) {
-    ElMessage.error('房源数据加载失败');
-    console.error(error);
-  }
-};
-
-// 初始化加载数据
-onMounted(() => {
-  fetchHouses();
-});
-</script>
-
 <style scoped>
 .houses-container {
   padding: 20px;
