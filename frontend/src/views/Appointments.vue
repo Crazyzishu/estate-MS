@@ -10,18 +10,18 @@
       <el-button type="primary" @click="openAddAppointmentModal">
         <el-icon><Plus /></el-icon> 新增预约
       </el-button>
-      <el-button>
-        <el-icon><Download /></el-icon> 导出数据
-      </el-button>
+<!--      <el-button>-->
+<!--        <el-icon><Download /></el-icon> 导出数据-->
+<!--      </el-button>-->
     </div>
     <!-- 筛选条件 -->
     <AppointmentFilter @search="handleSearch" @reset="handleReset" />
+    <!-- 预约列表 -->
+    <AppointmentList @view-detail="openAppointmentDetail" @confirm="confirmAppointment" @cancel="cancelAppointment" />
     <!-- 预约统计卡片 -->
     <AppointmentStats />
     <!-- 预约趋势图 -->
     <AppointmentTrendChart />
-    <!-- 预约列表 -->
-    <AppointmentList @view-detail="openAppointmentDetail" @confirm="confirmAppointment" @cancel="cancelAppointment" />
     <!-- 新增预约模态框 -->
     <AddAppointmentModal v-model:visible="addAppointmentVisible" @submit="handleAddAppointment" />
     <!-- 确认预约模态框 -->

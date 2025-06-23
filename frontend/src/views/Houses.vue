@@ -217,12 +217,12 @@ const handleCurrentChange = (pageNum) => {
       <el-button type="primary" @click="toggleHouseModal">
         <el-icon><Plus /></el-icon> 新增房源
       </el-button>
-      <el-button @click="exportData">
+      <!-- <el-button @click="exportData">
         <el-icon><Download /></el-icon> 导出数据
       </el-button>
       <el-button>
         <el-icon><Upload /></el-icon> 导入数据
-      </el-button>
+      </el-button> -->
     </div>
 
     <!-- 搜索栏 -->
@@ -531,8 +531,8 @@ const handleCurrentChange = (pageNum) => {
         </div>
 
         <div class="detail-actions">
-          <el-button type="primary" @click="editHouse(currentHouseDetails.id)">编辑房源</el-button>
-          <el-button @click="deleteHouse(currentHouseDetails.id)">删除房源</el-button>
+          <!-- <el-button type="primary" @click="editHouse(currentHouseDetails.id)">编辑房源</el-button> -->
+          <!-- <el-button @click="deleteHouse(currentHouseDetails.id)">删除房源</el-button> -->
         </div>
       </div>
     </el-drawer>

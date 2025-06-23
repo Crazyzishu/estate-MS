@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Map;
 
 /**
  * 客户信息实体类
@@ -16,12 +17,12 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Client {
-    private Long clientId;          // 客户ID（主键）
-    private String name;            // 客户姓名
-    private String phone;           // 手机号（唯一索引）
-    private String email;           // 邮箱
-    private BigDecimal budgetMin;   // 购房预算最低值
-    private BigDecimal budgetMax;   // 购房预算最高值
-    private String preference;      // 需求标签（JSON格式，如{"type":"住宅","area":"80-120"}）
-    private LocalDateTime createdAt; // 注册时间，默认值：当前时间
+    private Long clientId;
+    private String name;
+    private String phone;
+    private String email;
+    private BigDecimal budgetMin;
+    private BigDecimal budgetMax;
+    private Map<String, Object> preference;
+    private LocalDateTime createdAt;
 }

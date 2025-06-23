@@ -17,50 +17,44 @@
     </div>
 
     <!-- 筛选条件 -->
-    <el-card class="mb-6">
-      <el-form :model="filters" :inline="true" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <el-form-item label="投诉编号">
-          <el-input v-model="filters.number" placeholder="请输入投诉编号" />
-        </el-form-item>
-        <el-form-item label="客户姓名">
-          <el-input v-model="filters.clientName" placeholder="请输入客户姓名" />
-        </el-form-item>
-        <el-form-item label="投诉楼盘">
-          <el-select v-model="filters.property" placeholder="请选择楼盘">
-            <el-option label="全部" value="" />
-            <el-option label="朝阳一号" value="朝阳一号" />
-            <el-option label="海淀华府" value="海淀华府" />
-            <el-option label="东城国际" value="东城国际" />
-            <el-option label="西城时代" value="西城时代" />
-            <el-option label="南城花园" value="南城花园" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="投诉类型">
-          <el-select v-model="filters.type" placeholder="请选择类型">
-            <el-option label="全部" value="" />
-            <el-option label="服务态度" value="服务态度" />
-            <el-option label="房源信息" value="房源信息" />
-            <el-option label="合同条款" value="合同条款" />
-            <el-option label="交付问题" value="交付问题" />
-            <el-option label="质量问题" value="质量问题" />
-            <el-option label="其他问题" value="其他问题" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="处理状态">
-          <el-select v-model="filters.status" placeholder="请选择状态">
-            <el-option label="全部" value="" />
-            <el-option label="待分配" value="待分配" />
-            <el-option label="处理中" value="处理中" />
-            <el-option label="已解决" value="已解决" />
-            <el-option label="已关闭" value="已关闭" />
-          </el-select>
-        </el-form-item>
-        <el-form-item>
-          <el-button @click="resetFilters">重置</el-button>
-          <el-button type="primary" @click="searchComplaints">搜索</el-button>
-        </el-form-item>
-      </el-form>
-    </el-card>
+    <el-form :model="filters" label-width="90px" inline class="mb-4">
+      <el-form-item label="投诉编号">
+        <el-input v-model="filters.number" placeholder="请输入编号" />
+      </el-form-item>
+      <el-form-item label="客户姓名">
+        <el-input v-model="filters.clientName" placeholder="请输入姓名" />
+      </el-form-item>
+      <el-form-item label="楼盘名称">
+        <el-select v-model="filters.property" placeholder="请选择楼盘">
+          <el-option label="朝阳一号" value="朝阳一号" />
+          <el-option label="海淀华府" value="海淀华府" />
+          <el-option label="东城国际" value="东城国际" />
+          <el-option label="西城时代" value="西城时代" />
+          <el-option label="南城花园" value="南城花园" />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="投诉类型">
+        <el-select v-model="filters.type" placeholder="请选择类型">
+          <el-option label="服务态度" value="服务态度" />
+          <el-option label="房源信息" value="房源信息" />
+          <el-option label="合同条款" value="合同条款" />
+          <el-option label="交付问题" value="交付问题" />
+          <el-option label="质量问题" value="质量问题" />
+          <el-option label="其他问题" value="其他问题" />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="状态">
+        <el-select v-model="filters.status" placeholder="请选择状态">
+          <el-option label="待分配" value="待分配" />
+          <el-option label="处理中" value="处理中" />
+          <el-option label="已解决" value="已解决" />
+        </el-select>
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" @click="searchComplaints">查询</el-button>
+        <el-button @click="resetFilters">重置</el-button>
+      </el-form-item>
+    </el-form>
 
     <!-- 投诉统计 -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
@@ -120,13 +114,14 @@
 
     <!-- 投诉列表 -->
     <el-card>
+      <!-- 投诉列表 -->
       <div class="overflow-x-auto">
         <el-table :data="complaintList" border style="width: 100%">
           <el-table-column prop="id" label="投诉编号" width="150" />
           <el-table-column label="客户信息" width="180">
             <template #default="scope">
               <div class="flex items-center gap-3">
-                <img :src="scope.row.avatar" alt="客户头像" class="w-8 h-8 rounded-full object-cover">
+                <img :src="scope.row.avatar" alt="客户头像" class="w-8 h-8 rounded-full object-cover" />
                 <div>
                   <p class="font-medium">{{ scope.row.clientName }}</p>
                   <p class="text-sm text-gray-500">{{ scope.row.phone }}</p>
@@ -144,7 +139,9 @@
           </el-table-column>
           <el-table-column label="处理状态" width="120">
             <template #default="scope">
-              <el-tag :type="getComplaintStatusTagType(scope.row.status)">{{ scope.row.status }}</el-tag>
+              <el-tag :type="getComplaintStatusTagType(scope.row.status)">
+                {{ scope.row.status }}
+              </el-tag>
             </template>
           </el-table-column>
           <el-table-column label="操作" width="200">
@@ -166,16 +163,18 @@
       <!-- 分页 -->
       <div class="flex flex-col sm:flex-row items-center justify-between mt-6 gap-4">
         <div class="text-sm text-gray-500">
-          显示 <span class="font-medium">{{ (currentPage - 1) * pageSize + 1 }}</span> 到 <span class="font-medium">{{ Math.min(currentPage * pageSize, total) }}</span> 条，共 <span class="font-medium">{{ total }}</span> 条
+          显示 <span class="font-medium">{{ (currentPage - 1) * pageSize + 1 }}</span> 到
+          <span class="font-medium">{{ Math.min(currentPage * pageSize, total) }}</span> 条，共
+          <span class="font-medium">{{ total }}</span> 条
         </div>
         <el-pagination
-          v-model:current-page="currentPage"
-          v-model:page-size="pageSize"
-          :page-sizes="[5, 10, 20]"
-          layout="sizes, prev, pager, next"
-          :total="total"
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
+            v-model:current-page="currentPage"
+            v-model:page-size="pageSize"
+            :page-sizes="[5, 10, 20]"
+            layout="sizes, prev, pager, next"
+            :total="total"
+            @size-change="handleSizeChange"
+            @current-change="handleCurrentChange"
         />
       </div>
     </el-card>
@@ -406,6 +405,8 @@
 import { ref, reactive, onMounted, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import * as echarts from 'echarts'
+import axios from "axios";
+
 
 // 筛选条件
 const filters = reactive({
@@ -423,6 +424,54 @@ const total = ref(0)
 
 // 投诉列表
 const complaintList = ref([])
+
+// API 基础路径
+const API_BASE_URL = '/api/complaints'
+
+// 分页事件
+const handleSizeChange = (newSize) => {
+  pageSize.value = newSize
+  fetchComplaints()
+}
+
+const handleCurrentChange = (newPage) => {
+  currentPage.value = newPage
+  fetchComplaints()
+}
+
+// 获取状态标签类型
+const getComplaintStatusTagType = (status) => {
+  switch (status) {
+    case '待分配':
+      return 'info'
+    case '处理中':
+      return 'warning'
+    case '已解决':
+      return 'success'
+    default:
+      return ''
+  }
+}
+
+// 页面加载时获取数据
+onMounted(() => {
+  fetchComplaints()
+})
+
+// 搜索投诉
+const searchComplaints = () => {
+  currentPage.value = 1
+  fetchComplaints()
+}
+
+// 重置筛选条件
+const resetFilters = () => {
+  Object.keys(filters).forEach(key => {
+    filters[key] = ''
+  })
+  currentPage.value = 1
+  fetchComplaints()
+}
 
 // 本月投诉总数
 const monthlyComplaintCount = ref(0)
@@ -518,48 +567,34 @@ const submitComplaint = async () => {
   })
 }
 
-// 搜索投诉
-const searchComplaints = () => {
-  currentPage.value = 1
-  fetchComplaints()
-}
-
-// 重置筛选条件
-const resetFilters = () => {
-  Object.keys(filters).forEach(key => {
-    filters[key] = ''
-  })
-  currentPage.value = 1
-  fetchComplaints()
-}
 
 // 获取投诉列表
 const fetchComplaints = async () => {
-  // 模拟数据
-  complaintList.value = [
-    {
-      id: '#CP20250618001',
-      clientName: '王先生',
-      phone: '139****1234',
-      avatar: 'https://picsum.photos/id/1010/100/100',
-      property: '朝阳一号',
-      type: '服务态度',
-      date: '2025-06-18',
-      time: '10:30:25',
-      status: '待分配',
-      processRecords: [
-        {
-          action: '提交投诉',
-          time: '2025-06-18 10:30:25',
-          description: '客户通过电话提交了关于服务态度的投诉。',
-          operator: '系统自动创建'
-        }
-      ]
+  try {
+    const response = await axios.get(API_BASE_URL, {
+      params: {
+        pageNum: currentPage.value,
+        pageSize: pageSize.value,
+        number: filters.number,
+        clientName: filters.clientName,
+        property: filters.property,
+        type: filters.type,
+        status: filters.status
+      }
+    })
+
+    if (response.data.code === 200) {
+      complaintList.value = response.data.data.list || []
+      total.value = response.data.data.total || 0
+    } else {
+      ElMessage.error('获取投诉列表失败')
     }
-  ]
-  total.value = complaintList.value.length
-  monthlyComplaintCount.value = 28
+  } catch (error) {
+    console.error('Error fetching complaints:', error)
+    ElMessage.error('网络请求出错，请检查后端服务')
+  }
 }
+
 
 // 打开投诉详情模态框
 const openComplaintDetail = (id) => {
@@ -686,32 +721,9 @@ const handleRemove = (file, fileList) => {
   console.log(file, fileList)
 }
 
-// 分页大小改变
-const handleSizeChange = val => {
-  pageSize.value = val
-  fetchComplaints()
-}
-
-// 当前页码改变
-const handleCurrentChange = val => {
-  currentPage.value = val
-  fetchComplaints()
-}
-
 // 导出数据
 const exportData = () => {
   ElMessage.success('数据导出成功')
-}
-
-// 获取投诉状态标签类型
-const getComplaintStatusTagType = status => {
-  switch (status) {
-    case '待分配': return 'warning'
-    case '处理中': return 'primary'
-    case '已解决': return 'success'
-    case '已关闭': return 'info'
-    default: return 'info'
-  }
 }
 
 // 初始化加载数据

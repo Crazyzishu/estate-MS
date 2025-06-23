@@ -62,7 +62,7 @@
       
       <!-- 最近房源 -->
       <el-row :gutter="20" style="margin-top: 20px">
-        <el-col :span="16">
+        <el-col :span="24">
           <el-card>
             <div slot="header" class="clearfix">
               <span>最近房源</span>
@@ -98,46 +98,46 @@
             </el-table>
           </el-card>
         </el-col>
-        <el-col :span="8">
-          <el-card>
-            <div slot="header" class="clearfix">
-              <span>近期预约</span>
-              <el-button style="float: right; padding: 3px 0" type="text">查看全部</el-button>
-            </div>
-            <div v-for="(appointment, index) in appointments" :key="index" style="margin-bottom: 20px">
-            <div style="display: flex; align-items: center; margin-bottom: 10px">
-              <div>
-                <p style="margin: 0">{{ appointment.name }}</p>
-                <p style="margin: 0; color: #999">{{ appointment.time }}</p>
-              </div>
-            </div>
-            <p style="margin: 5px 0">{{ appointment.property }}</p>
-            <el-button-group>
-              <el-button
-                size="mini"
-                :type="appointment.status === 0 ? 'primary' : ''"
-                @click="updateAppointmentStatus(appointment, 0)"
-              >
-                未完成
-              </el-button>
-              <el-button
-                size="mini"
-                :type="appointment.status === 1 ? 'primary' : ''"
-                @click="updateAppointmentStatus(appointment, 1)"
-              >
-                已完成
-              </el-button>
-              <el-button
-                size="mini"
-                :type="appointment.status === 2 ? 'primary' : ''"
-                @click="updateAppointmentStatus(appointment, 2)"
-              >
-                已取消
-              </el-button>
-            </el-button-group>
-          </div>
-          </el-card>
-        </el-col>
+<!--        <el-col :span="8">-->
+<!--          <el-card>-->
+<!--            <div slot="header" class="clearfix">-->
+<!--              <span>近期预约</span>-->
+<!--              <el-button style="float: right; padding: 3px 0" type="text">查看全部</el-button>-->
+<!--            </div>-->
+<!--            <div v-for="(appointment, index) in appointments" :key="index" style="margin-bottom: 20px">-->
+<!--            <div style="display: flex; align-items: center; margin-bottom: 10px">-->
+<!--              <div>-->
+<!--                <p style="margin: 0">{{ appointment.name }}</p>-->
+<!--                <p style="margin: 0; color: #999">{{ appointment.time }}</p>-->
+<!--              </div>-->
+<!--            </div>-->
+<!--            <p style="margin: 5px 0">{{ appointment.property }}</p>-->
+<!--            <el-button-group>-->
+<!--              <el-button-->
+<!--                size="mini"-->
+<!--                :type="appointment.status === 0 ? 'primary' : ''"-->
+<!--                @click="updateAppointmentStatus(appointment, 0)"-->
+<!--              >-->
+<!--                未完成-->
+<!--              </el-button>-->
+<!--              <el-button-->
+<!--                size="mini"-->
+<!--                :type="appointment.status === 1 ? 'primary' : ''"-->
+<!--                @click="updateAppointmentStatus(appointment, 1)"-->
+<!--              >-->
+<!--                已完成-->
+<!--              </el-button>-->
+<!--              <el-button-->
+<!--                size="mini"-->
+<!--                :type="appointment.status === 2 ? 'primary' : ''"-->
+<!--                @click="updateAppointmentStatus(appointment, 2)"-->
+<!--              >-->
+<!--                已取消-->
+<!--              </el-button>-->
+<!--            </el-button-group>-->
+<!--          </div>-->
+<!--          </el-card>-->
+<!--        </el-col>-->
       </el-row>
     </div>
   </template>

@@ -6,6 +6,8 @@ import 'element-plus/dist/index.css'
 import * as echarts from 'echarts'
 import axios from 'axios'
 
+import LoginRegister from "./views/LoginRegister.vue";
+
 const app = createApp(App)
 
 // 检查是否有全局路由守卫

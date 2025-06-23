@@ -23,16 +23,16 @@
             <i class="el-icon-document"></i>
             <span>客户服务</span>
           </template>
-          <el-menu-item index="2-1" @click="navigateTo('/appointments')">预约看房</el-menu-item>
+<!--          <el-menu-item index="2-1" @click="navigateTo('/appointments')">预约看房</el-menu-item>-->
           <el-menu-item index="2-2" @click="navigateTo('/complaint')">投诉处理</el-menu-item>
         </el-sub-menu>
-        <el-sub-menu index="3">
+        <!-- <el-sub-menu index="3">
           <template #title>
             <i class="el-icon-setting"></i>
             <span>系统管理</span>
           </template>
           <el-menu-item index="3-1" @click="navigateTo('/usermanager')">用户管理</el-menu-item>
-        </el-sub-menu>
+        </el-sub-menu> -->
       </el-menu>
     </el-aside>
   </template>

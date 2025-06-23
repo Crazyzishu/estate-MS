@@ -7,7 +7,7 @@
             <h1 style="margin: 0; font-size: 1.5rem">房产管理系统</h1>
           </div>
           <div style="display: flex; align-items: center">
-            <el-input v-model="searchQuery" placeholder="全局搜索..." style="width: 200px; margin-right: 10px" />
+            <!-- <el-input v-model="searchQuery" placeholder="全局搜索..." style="width: 200px; margin-right: 10px" /> -->
             <el-badge :value="3" class="item" style="margin-right: 20px">
               <el-button icon="el-icon-bell" circle />
             </el-badge>

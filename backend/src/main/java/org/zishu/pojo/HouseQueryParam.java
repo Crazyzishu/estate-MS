@@ -18,12 +18,4 @@ public class HouseQueryParam {
   private  Double minPrice;//最低价格
   private  Double maxPrice;//最高价格
   private String status;//房源状态（待审核/在售/已售）
-
-  public Integer getPageNum() {
-    return pageNum;
-  }
-
-  public Integer getPageSize() {
-    return pageSize;
-  }
 }

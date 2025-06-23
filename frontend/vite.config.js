@@ -13,7 +13,7 @@ export default defineConfig({
       '/dashboard': {
         target: 'http://localhost:8080', // 后端地址
         changeOrigin: true,
-        rewrite: path => path.replace(/^\/dashboard/, '/dashboard') // 保持路径一致
+        rewrite: path => path.replace(/^\/api/, '') // 保持路径一致
       }
     }
   }

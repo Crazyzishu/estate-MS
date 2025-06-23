@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.zishu.mapper.AdminMapper">
+
+    <insert id="insert">
+        INSERT INTO admin (
+            username, password, real_name, email, phone,
+            role, is_active, avatar_url
+        ) VALUES (
+            #{username}, #{password}, #{realName}, #{email}, #{phone},
+            #{role}, #{isActive}, #{avatarUrl}
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE admin SET
+            username = #{username},
+            password = #{password},
+            real_name = #{realName},
+            email = #{email},
+            phone = #{phone},
+            role = #{role},
+            is_active = #{isActive},
+            avatar_url = #{avatarUrl}
+        WHERE admin_id = #{adminId}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM admin WHERE admin_id = #{id}
+    </delete>
+
+    <select id="selectById" resultType="org.zishu.pojo.Admin">
+        SELECT * FROM admin WHERE admin_id = #{id}
+    </select>
+
+    <select id="selectAll" resultType="org.zishu.pojo.Admin">
+        SELECT * FROM admin
+    </select>
+
+    <select id="selectByUsername" parameterType="string" resultType="org.zishu.pojo.Admin">
+        SELECT * FROM admin WHERE username = #{username}
+    </select>
+
+</mapper>
