@@ -12,7 +12,7 @@
             <i class="el-icon-location"></i>
             <span>主要功能</span>
           </template>
-          <el-menu-item index="1-1" @click="navigateTo('/')">数据概览</el-menu-item>
+          <el-menu-item index="1-1" @click="navigateTo('/dashboard')">数据概览</el-menu-item>
           <el-menu-item index="1-2" @click="navigateTo('/houses')">房源管理</el-menu-item>
           <el-menu-item index="1-3" @click="navigateTo('/clients')">客户管理</el-menu-item>
           <el-menu-item index="1-4" @click="navigateTo('/contracts')">合同管理</el-menu-item>

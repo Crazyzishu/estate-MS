@@ -5,7 +5,6 @@ import org.zishu.pojo.Admin;
 import java.util.List;
 
 public interface AdminService {
-    void register(Admin admin);
     List<Admin> getAllAdmins();
     Admin getAdminById(Long id);
     void updateAdmin(Admin admin);
@@ -17,4 +16,6 @@ public interface AdminService {
      * @return 匹配的管理员对象，若无匹配则返回 null
      */
     Admin login(String username, String password);
+    // 添加注册方法
+    void register(Admin admin);
 }

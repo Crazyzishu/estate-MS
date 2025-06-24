@@ -16,6 +16,14 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public void register(Admin admin) {
+        // 检查用户名是否已存在
+        Admin existingAdmin = adminMapper.selectByUsername(admin.getUsername());
+        if (existingAdmin != null) {
+            throw new RuntimeException("用户名已存在");
+        }
+        // 设置默认值
+        admin.setRole("ADMIN"); // 默认角色
+        admin.setIsActive(true); // 默认激活
         adminMapper.insert(admin);
     }
 

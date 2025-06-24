@@ -1,7 +1,7 @@
 package org.zishu.controller.admin;
 
 import org.zishu.pojo.Admin;
-import org.zishu.service.admin.LoginService;
+import org.zishu.service.admin.RegisterService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -11,18 +11,18 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api")
-public class LoginController {
+public class RegisterController {
 
     @Autowired
-    private LoginService loginService;
+    private RegisterService registerService;
 
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody Admin admin) {
-        boolean isAuthenticated = loginService.authenticate(admin.getUsername(), admin.getPassword());
-        if (isAuthenticated) {
-            return ResponseEntity.ok("Login successful");
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody Admin admin) {
+        boolean isRegistered = registerService.register(admin);
+        if (isRegistered) {
+            return ResponseEntity.ok("Registration successful");
         } else {
-            return ResponseEntity.badRequest().body("Invalid credentials");
+            return ResponseEntity.badRequest().body("Username already exists");
         }
     }
 }

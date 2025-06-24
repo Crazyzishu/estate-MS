@@ -145,7 +145,7 @@
   <script setup>
   import { ref, onMounted } from 'vue'
   import * as echarts from 'echarts'
-  import axios from 'axios';
+  import axios from '../api/axios.js';
 
   //数据卡片
   // const cards = [

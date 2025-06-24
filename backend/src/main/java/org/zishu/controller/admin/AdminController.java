@@ -18,16 +18,6 @@ public class AdminController {
     private AdminService adminService;
 
     /**
-     * 注册新管理员
-     */
-    @PostMapping
-    public Result register(@RequestBody Admin admin) {
-        log.info("注册管理员: {}", admin.getUsername());
-        adminService.register(admin);
-        return Result.success();
-    }
-
-    /**
      * 查询所有管理员
      */
     @GetMapping

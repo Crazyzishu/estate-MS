@@ -1,8 +1,4 @@
-import axios from 'axios';
-
-const apiClient = axios.create({
-  baseURL: 'http://localhost:8080', // 确保这个地址正确指向你的后端服务
-});
+import apiClient from './axios';
 
 export default {
   login(credentials) {

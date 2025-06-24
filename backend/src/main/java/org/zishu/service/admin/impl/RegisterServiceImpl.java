@@ -1,0 +1,25 @@
+package org.zishu.service.admin.impl;
+
+import org.zishu.pojo.Admin;
+import org.zishu.mapper.RegisterMapper;
+import org.zishu.service.admin.RegisterService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
+public class RegisterServiceImpl implements RegisterService {
+
+    @Autowired
+    private RegisterMapper registerMapper;
+
+    @Override
+    public boolean register(Admin admin) {
+        Admin existingAdmin = registerMapper.findByUsername(admin.getUsername());
+        if (existingAdmin == null) {
+            registerMapper.insertAdmin(admin);
+            return true;
+        } else {
+            return false;
+        }
+    }
+}
