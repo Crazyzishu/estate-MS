@@ -1,7 +1,9 @@
 <script setup>
 import { ref, onMounted, reactive } from 'vue';
-import { ElMessage,ElMessageBox } from 'element-plus';
-import {queryPageApi,addHouseApi,queryInfoApi,updateHouseApi,deleteHouseApi} from '../api/house';
+import { ElMessage, ElMessageBox } from 'element-plus';
+import { queryPageApi, addHouseApi, queryInfoApi, updateHouseApi, deleteHouseApi } from '../api/house';
+// 引入需要的图标
+import { View, Edit, Delete, Plus } from '@element-plus/icons-vue';
 
 // 钩子函数,初始化加载数据
 onMounted(() => {
@@ -25,38 +27,31 @@ const pageSize = ref(5);//每页展示记录数
 const total = ref(0);//总记录数
 
 //查询房源信息
-const search= async () => { 
-  const result= await queryPageApi
-  (
-  searchHouse.value.addressKeyword,
-  searchHouse.value.minPrice,
-  searchHouse.value.maxPrice,
-  searchHouse.value.status,
-  currentPage.value,
-  pageSize.value
-);
-if(result.code){
-  total.value=result.data.total;
-  houseList.value=result.data.rows;
-}
+const search = async () => { 
+  const result = await queryPageApi(
+    searchHouse.value.addressKeyword,
+    searchHouse.value.minPrice,
+    searchHouse.value.maxPrice,
+    searchHouse.value.status,
+    currentPage.value,
+    pageSize.value
+  );
+  if(result.code){
+    total.value = result.data.total;
+    houseList.value = result.data.rows;
+  }
 };
-
-
 
 //清空
-const clear=() => { 
+const clear = () => { 
   searchHouse.value = {
     addressKeyword: '',
-    minPrice: 0,
-    maxPrice: 50000,
+    minPrice: '0',
+    maxPrice: '50000',
     status: ''
-  }
+  };
   search();
 };
-
-
-
-
 
 // 房源表单相关
 const dialogVisible = ref(false);
@@ -85,7 +80,7 @@ const openHouseDetail = async (houseId) => {
     currentHouseDetails.value = result.data;
     currentHouseId.value = houseId;
     isHouseDetailOpen.value = true;
-  }else{
+  } else {
     ElMessage.error('获取房源信息失败！');
   }
 };
@@ -124,7 +119,7 @@ const deleteHouse = (houseId) => {
 
 // 模态框操作
 const toggleHouseModal = () => {
-  dialogTitle.value = '房源录入'
+  dialogTitle.value = '房源录入';
   dialogVisible.value = !dialogVisible.value;
   if (!dialogVisible.value) {
     resetForm();
@@ -155,30 +150,28 @@ const house = ref({
   managerId: null,
   description: '',
   images: ''
-})
+});
 
 const save = async () => {
   if(house.value.houseId){
-    const result=await updateHouseApi(house.value);
-    if (result.code) {//成功
-    ElMessage.success('保存成功');
-    dialogVisible.value = false;
-    search();
-  } else {//失败
-    ElMessage.error('保存失败');
+    const result = await updateHouseApi(house.value);
+    if (result.code) { // 成功
+      ElMessage.success('保存成功');
+      dialogVisible.value = false;
+      search();
+    } else { // 失败
+      ElMessage.error('保存失败');
+    }
+  } else { 
+    const result = await addHouseApi(house.value);
+    if (result.code) { // 成功
+      ElMessage.success('保存成功');
+      dialogVisible.value = false;
+      search();
+    } else { // 失败
+      ElMessage.error('保存失败');
+    }
   }
-  }else{ 
-    const result= await addHouseApi(house.value);
-    if (result.code) {//成功
-    ElMessage.success('保存成功');
-    dialogVisible.value = false;
-    search();
-  } else {//失败
-    ElMessage.error('保存失败');
-  }
-  }
-  
-  
 };
 
 // 文件上传
@@ -201,8 +194,6 @@ const handleCurrentChange = (pageNum) => {
   currentPage.value = pageNum;
   search();
 };
-
-
 </script>
 <template>
   <div class="houses-container">
@@ -305,20 +296,20 @@ const handleCurrentChange = (pageNum) => {
           <template #default="scope">
             <el-button 
               size="small" 
-              icon="View" 
+              :icon="View" 
               @click="openHouseDetail(scope.row.houseId)"
               plain
             >详情</el-button>
             <el-button 
               size="small" 
-              icon="Edit" 
+              :icon="Edit" 
               type="primary"
               @click="editHouse(scope.row.houseId)"
               plain
             >编辑</el-button>
             <el-button 
               size="small" 
-              icon="Delete" 
+              :icon="Delete" 
               type="danger"
               plain
               @click="deleteHouse(scope.row.houseId)"
@@ -405,11 +396,10 @@ const handleCurrentChange = (pageNum) => {
             :on-preview="handlePictureCardPreview"
             :on-remove="handleRemove"
           >
-            
             <template #default>
               <el-button size="small">
-              <el-icon><Plus /></el-icon> 点击上传
-            </el-button>
+                <el-icon><Plus /></el-icon> 点击上传
+              </el-button>
               <i class="el-icon-plus"></i>
             </template>
           </el-upload>

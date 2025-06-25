@@ -18,7 +18,7 @@
               <template #dropdown>
                 <el-dropdown-menu>
                   <el-dropdown-item>个人中心</el-dropdown-item>
-                  <el-dropdown-item>退出登录</el-dropdown-item>
+                  <el-dropdown-item @click="logout">退出登录</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -30,6 +30,13 @@
   
   <script setup>
   import { ref } from 'vue'
-  
+  import { useRouter } from 'vue-router'
+
   const searchQuery = ref('')
+  const router = useRouter()
+
+  const logout = () => {
+    // 这里可以添加清除登录状态的逻辑，比如清除 token 等
+    router.push('/login')
+  }
   </script>

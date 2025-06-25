@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.zishu.mapper.ContractMapper">
+<!--    自定义结果集-->
+    <resultMap id="contractResultMap" type="org.zishu.pojo.Contract">
+        <id property="contractId" column="contract_id"/>
+        <result property="clientId" column="client_id"/>
+        <result property="houseId" column="house_id"/>
+        <result property="managerId" column="manager_id"/>
+        <result property="totalAmount" column="total_amount"/>
+        <result property="paymentPlan" column="payment_plan"/>
+        <result property="signTime" column="sign_time"/>
+        <result property="status" column="status"/>
+    </resultMap>
+
+    <!-- 新增合同 -->
+    <insert id="insert" parameterType="org.zishu.pojo.Contract">
+            INSERT INTO contracts (client_id, house_id, manager_id, total_amount, payment_plan, sign_time, status, contract_file)
+            VALUES (#{clientId}, #{houseId}, #{managerId}, #{totalAmount}, #{paymentPlan}, #{signTime}, #{status}, #{contractFile})
+    </insert>
+    <update id="update">
+        UPDATE contracts
+        <set>
+        <if test="clientId != null">client_id = #{clientId},</if>
+        <if test="houseId!= null">house_id = #{houseId},</if>
+        <if test="managerId!= null">manager_id = #{managerId},</if>
+        <if test="totalAmount!= null">total_amount = #{totalAmount},</if>
+        <if test="paymentPlan!= null">payment_plan = #{paymentPlan},</if>
+        <if test="signTime!= null">sign_time = #{signTime},</if>
+        <if test="status!= null">status = #{status},</if>
+        <if test="contractFile!= null">contract_file = #{contractFile},</if>
+        </set>
+    </update>
+    <delete id="delete">
+        DELETE FROM contracts
+        WHERE contract_id = #{id}
+    </delete>
+
+    <!--    分页查询-->
+    <select id="list" resultType="org.zishu.pojo.Contract">
+        SELECT
+            c.contract_id as contractId,
+            cl.name AS clientName,
+            h.address AS address,
+            CASE
+                WHEN cl.intent = 1 THEN '购房'
+                WHEN cl.intent = 2 THEN '租房'
+                WHEN cl.intent = 3 THEN '投资'
+                ElSE '其他'
+                END AS contractType,
+            c.sign_time as signTime,
+            c.total_amount as totalAmount,
+            c.status,
+            m.real_name AS managerName
+        FROM
+            contracts c
+                JOIN
+            clients cl ON c.client_id = cl.client_id
+                JOIN
+            houses h ON c.house_id = h.house_id
+                Join
+            manager m ON c.manager_id = m.manager_id
+        <where>
+            <if test="contractId != null">
+                AND c.contract_id = #{contractId}
+            </if>
+            <if test="clientName != null">
+                AND cl.name LIKE CONCAT('%', #{clientName}, '%')
+            </if>
+            <if test="contractType != null">
+                AND cl.intent = #{contractType}
+            </if>
+            <if test="status != null or status != ''">
+                AND c.status LIKE CONCAT('%', #{status}, '%')
+            </if>
+        </where>
+    </select>
+
+<!--    获取全部客户名字-->
+    <select id="getAllClients" resultType="java.util.Map">
+        SELECT client_id AS clientId, name AS clientName FROM clients
+    </select>
+
+<!--    获取全部房源地址-->
+    <select id="getAllHouses" resultType="java.util.Map">
+        SELECT house_id AS houseId, address AS address FROM houses
+    </select>
+
+<!--    获取全部经理名字-->
+    <select id="getAllManagers" resultType="java.util.Map">
+        SELECT manager_id AS managerId, real_name AS managerName FROM manager
+    </select>
+
+<!--    根据id查询合同信息-->
+    <select id="getById" resultType="org.zishu.pojo.Contract">
+        SELECT
+            c.*,
+            cl.name AS clientName,
+            h.address AS address,
+            CASE
+                WHEN cl.intent = 1 THEN '购房'
+                WHEN cl.intent = 2 THEN '租房'
+                WHEN cl.intent = 3 THEN '投资'
+                ElSE '其他'
+                END AS contractType,
+            m.real_name AS managerName
+        FROM
+            contracts c
+                JOIN
+            clients cl ON c.client_id = cl.client_id
+                JOIN
+            houses h ON c.house_id = h.house_id
+                Join
+            manager m ON c.manager_id = m.manager_id
+
+            WHERE  c.contract_id = #{id}
+    </select>
+
+</mapper>

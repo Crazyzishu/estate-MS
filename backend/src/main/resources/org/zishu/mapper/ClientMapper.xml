@@ -1,0 +1,100 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.zishu.mapper.ClientMapper">
+<!--自定义结果集-->
+    <resultMap id="clientResultMap" type="org.zishu.pojo.Client">
+        <id property="clientId" column="client_id"/>
+        <result property="name" column="name"/>
+        <result property="type" column="type"/>
+        <result property="phone" column="phone"/>
+        <result property="email" column="email"/>
+        <result property="intent" column="intent"/>
+        <result property="budget" column="budget"/>
+        <result property="roomRequirement" column="room_requirement"/>
+        <result property="area" column="area"/>
+        <result property="preferredArea" column="preferred_area"/>
+        <result property="additionalRequirements" column="additional_requirements"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+
+<!--    新增客户信息-->
+    <insert id="save">
+        INSERT INTO clients (name, type, phone, email, intent, budget, room_requirement, area, preferred_area, additional_requirements, created_at)
+        VALUES (#{name}, #{type}, #{phone}, #{email}, #{intent}, #{budget}, #{roomRequirement}, #{area}, #{preferredArea}, #{additionalRequirements}, #{createdAt})
+    </insert>
+
+<!--    根据id修改客户信息-->
+    <update id="update">
+        UPDATE clients
+        SET name = #{name},
+            type = #{type},
+            phone = #{phone},
+            email = #{email},
+            intent = #{intent},
+            budget = #{budget},
+            room_requirement = #{roomRequirement},
+            area = #{area},
+            preferred_area = #{preferredArea},
+            additional_requirements = #{additionalRequirements}
+        WHERE client_id = #{clientId}
+    </update>
+
+<!--    根据id删除客户信息-->
+    <delete id="delete">
+        DELETE FROM clients
+        WHERE client_id = #{clientId}
+    </delete>
+
+<!--    条件分页查询-->
+    <select id="list" resultType="org.zishu.pojo.Client">
+        SELECT client_id, name,
+        CASE
+        WHEN type = 1 THEN '个人'
+        WHEN type = 2 THEN '企业'
+        ELSE '其他'
+        END AS type,
+        phone, email,
+        CASE
+        WHEN intent = 1 THEN '购房'
+        WHEN intent = 2 THEN '租房'
+        WHEN intent = 3 THEN '投资'
+        ElSE '其他'
+        END AS intent,
+        budget, room_requirement, area, preferred_area, additional_requirements, created_at
+        FROM clients
+        <where>
+            <if test="name != null">
+                AND name LIKE CONCAT('%', #{name}, '%')
+            </if>
+            <if test="type != null">
+                AND type = #{type}
+            </if>
+            <if test="intent != null">
+                AND intent = #{intent}
+            </if>
+        </where>
+        ORDER BY client_id ASC
+    </select>
+
+<!--    根据id查询客户信息-->
+    <select id="getById" resultType="org.zishu.pojo.Client">
+        SELECT client_id, name,
+               CASE
+                   WHEN type = 1 THEN '个人'
+                   WHEN type = 2 THEN '企业'
+                   ELSE '其他'
+                   END AS type,
+               phone, email,
+               CASE
+                   WHEN intent = 1 THEN '购房'
+                   WHEN intent = 2 THEN '租房'
+                   WHEN intent = 3 THEN '投资'
+                   ElSE '其他'
+                   END AS intent,
+               budget, room_requirement, area, preferred_area, additional_requirements, created_at
+        FROM clients WHERE client_id = #{clientId}
+    </select>
+
+
+</mapper>

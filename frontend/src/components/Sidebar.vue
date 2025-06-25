@@ -3,6 +3,7 @@
     <el-aside style="background-color: #fff; border-right: 1px solid #e4e7ed">
       <el-menu
         default-active="1"
+        default-openeds="1,2"
         class="el-menu-vertical-demo"
         @open="handleOpen"
         @close="handleClose"
@@ -10,7 +11,7 @@
         <el-sub-menu index="1">
           <template #title>
             <i class="el-icon-location"></i>
-            <span>主要功能</span>
+            <span style="color: black;">主要功能</span> <!-- 设置为浅灰色 -->
           </template>
           <el-menu-item index="1-1" @click="navigateTo('/dashboard')">数据概览</el-menu-item>
           <el-menu-item index="1-2" @click="navigateTo('/houses')">房源管理</el-menu-item>
@@ -21,7 +22,7 @@
         <el-sub-menu index="2">
           <template #title>
             <i class="el-icon-document"></i>
-            <span>客户服务</span>
+            <span style="color: black;">客户服务</span> <!-- 设置为浅灰色 -->
           </template>
 <!--          <el-menu-item index="2-1" @click="navigateTo('/appointments')">预约看房</el-menu-item>-->
           <el-menu-item index="2-2" @click="navigateTo('/complaint')">投诉处理</el-menu-item>
@@ -53,3 +54,6 @@
     console.log(key, keyPath)
   }
   </script>
+  <style>
+
+</style>

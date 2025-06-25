@@ -19,8 +19,15 @@ import java.util.Map;
 public class Client {
     private Long clientId;
     private String name;
+    private String type;
     private String phone;
     private String email;
+    private String intent;
+    private Long budget;
+    private String roomRequirement;
+    private Integer area;
+    private String preferredArea;
+    private String additionalRequirements;
     private BigDecimal budgetMin;
     private BigDecimal budgetMax;
     private Map<String, Object> preference;

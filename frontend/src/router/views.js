@@ -21,5 +21,4 @@ export default [
   { path: '/complaint', component: Complaint, meta: { title: '投诉处理' } },
   { path: '/userManager', component: UserManager, meta: { title: '用户管理' } },
   { path: '/contracts/new', component: ContractForm, meta: { title: '新增合同' } },
-  {}
 ]

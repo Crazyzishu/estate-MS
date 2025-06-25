@@ -1,7 +1,7 @@
 <template>
     <div>
       <h1>数据概览</h1>
-      <p>欢迎回来，张经理！这是您的房地产管理系统概览</p>
+      <p>欢迎回来，经理！这是您的房地产管理系统概览</p>
       
       <!-- 数据卡片 -->
       <el-row :gutter="20" style="margin: 20px 0">
@@ -66,7 +66,8 @@
           <el-card>
             <div slot="header" class="clearfix">
               <span>最近房源</span>
-              <el-button style="float: right; padding: 3px 0" type="text">查看全部</el-button>
+              <!-- 绑定点击事件 -->
+              <el-button style="float: right; padding: 3px 0" type="text" @click="navigateToHouses">查看全部</el-button>
             </div>
             <el-table :data="houses" border style="width: 100%">
               <el-table-column prop="id" label="房源ID" width="150"></el-table-column>
@@ -147,26 +148,31 @@
   import * as echarts from 'echarts'
   import axios from '../api/axios.js';
 
+  //引入路由
+  import { useRouter } from 'vue-router'
+
+  const router = useRouter()
+
   //数据卡片
-  // const cards = [
-  //   { title: '总房源数', value: '248', trendClass: 'text-success', trendIcon: 'el-icon-arrow-up', trendText: '12% 较上月', buttonText: '' },
-  //   { title: '本月销售额', value: '¥56,248,000', trendClass: 'text-success', trendIcon: 'el-icon-arrow-up', trendText: '8% 较上月', buttonText: '' },
-  //   { title: '客户总数', value: '1,254', trendClass: 'text-success', trendIcon: 'el-icon-arrow-up', trendText: '15% 较上月', buttonText: '' },
-  //   { title: '预约看房', value: '42', trendClass: 'text-danger', trendIcon: 'el-icon-arrow-down', trendText: '3% 较上月', buttonText: '' }
-  // ]
   const cards = ref([
     { title: '总房源数', value: '加载中...', trendClass: '', trendIcon: '', trendText: '' },
     { title: '本月销售额', value: '加载中...', trendClass: '', trendIcon: '', trendText: '' },
     { title: '客户总数', value: '加载中...', trendClass: '', trendIcon: '', trendText: '' },
     { title: '预约看房', value: '加载中...', trendClass: '', trendIcon: '', trendText: '' }
   ]);
-  
+
   const houses = [
     { id: '#20250615001', name: '朝阳区XX小区', address: '朝阳区XX路XX号', price: '¥12,000,000', area: '120㎡', status: '在售', image: 'https://picsum.photos/id/1040/100/100' },
     { id: '#20250615002', name: '海淀区XX花园', address: '海淀区XX路XX号', price: '¥15,800,000', area: '150㎡', status: '待审核', image: 'https://picsum.photos/id/1067/100/100' },
     { id: '#20250615003', name: '东城区XX大厦', address: '东城区XX路XX号', price: '¥22,500,000', area: '200㎡', status: '已售', image: 'https://picsum.photos/id/164/100/100' },
     { id: '#20250615004', name: '西城区XX公寓', address: '西城区XX路XX号', price: '¥9,600,000', area: '90㎡', status: '在售', image: 'https://picsum.photos/id/1048/100/100' }
   ]
+
+
+  // 跳转至房源管理页面
+const navigateToHouses = () => {
+    router.push('/houses')
+}
 
   //数据暂存
   //, avatar: 'https://picsum.photos/id/1012/100/100'
@@ -210,18 +216,12 @@
     }
   };
 
-  const updateAppointmentStatus = (appointment, newStatus) => {
-  appointment.status = newStatus;
-  // TODO: 调用 API 提交到后端更新状态
-  console.log('更新预约状态:', appointment.appointmentId, '=>', newStatus);
-};
 
-  function safeGet(obj, key, defaultValue = '') {
-    return obj[key] !== undefined ? obj[key] : defaultValue;
-  }
+
+
   const fetchDashboardCards = async () => {
     try {
-      const response = await axios.get('/dashboard/cards');
+      const response = await axios.get('/api/dashboard/cards');
       if (response.data.code === 1 && response.data.data) {
         const data = response.data.data;
 
@@ -274,7 +274,7 @@
 
   const fetchSalesTrend = async (timeRange = 'month') => {
     try {
-      const res = await axios.get(`/dashboard/sales-trend?timeRange=${timeRange}`);
+      const res = await axios.get(`/api/dashboard/sales-trend?timeRange=${timeRange}`);
       if (res.data.code === 1) {
         console.log('【DEBUG】原始数据:', res.data.data); // 查看原始数据类型
         let rawData = res.data.data || [];
@@ -301,7 +301,7 @@
   // 获取房源户型分布
   const fetchHouseRoomTypes = async () => {
     try {
-      const res = await axios.get('/dashboard/house-room-types');
+      const res = await axios.get('/api/dashboard/house-room-types');
       if (res.data.code === 1) {
         houseRoomTypeData.value = res.data.data;
         initHouseTypeChart();
@@ -481,14 +481,4 @@
     return filledData;
   };
 
-
-  const handleDetail = (index, row) => {
-    console.log(index, row)
-  }
-  const handleEdit = (index, row) => {
-    console.log(index, row)
-  }
-  const handleDelete = (index, row) => {
-    console.log(index, row)
-  }
   </script>

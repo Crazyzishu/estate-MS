@@ -1,5 +1,7 @@
 #\u914D\u7F6E\u6570\u636E\u5E93\u7684\u8FDE\u63A5\u4FE1\u606F
 spring:
+  mvc:
+    static-path-pattern: /static/**
   application:
     name: ems
     #\u6570\u636E\u5E93\u7684\u8FDE\u63A5\u4FE1\u606F
