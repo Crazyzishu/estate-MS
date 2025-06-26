@@ -8,14 +8,13 @@ import org.zishu.service.admin.RegisterService;
 
 @Service
 public class RegisterServiceImpl implements RegisterService {
-
     @Autowired
     private RegisterMapper registerMapper;
 
     @Override
     public boolean register(Admin admin) {
         if (registerMapper.existsByUsername(admin.getUsername())) {
-            return false;
+            return false; // 用户名已存在
         }
         registerMapper.insertAdmin(admin);
         return true;

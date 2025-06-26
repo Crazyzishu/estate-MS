@@ -13,9 +13,9 @@
             </div>
             <div class="text item">
               <h3>{{ card.value }}</h3>
-              <p :class="card.trendClass">
+              <!-- <p :class="card.trendClass">
                 <i :class="card.trendIcon"></i> {{ card.trendText }}
-              </p>
+              </p> -->
             </div>
           </el-card>
         </el-col>
@@ -25,14 +25,6 @@
       <el-row :gutter="20">
         <el-col :span="16">
           <el-card>
-<!--            <div slot="header" class="clearfix">-->
-<!--              <span>销售趋势</span>-->
-<!--              <el-button-group style="float: right">-->
-<!--                <el-button type="primary" plain @click="fetchSalesTrend('month')">本月</el-button>-->
-<!--                <el-button type="primary" plain @click="fetchSalesTrend('quarter')">本季度</el-button>-->
-<!--                <el-button type="primary" plain @click="fetchSalesTrend('year')">本年度</el-button>-->
-<!--              </el-button-group>-->
-<!--            </div>-->
             <div slot="header" class="clearfix">
               <span>销售趋势</span>
               <el-button-group style="float: right">
@@ -162,10 +154,10 @@
   ]);
 
   const houses = [
-    { id: '#20250615001', name: '朝阳区XX小区', address: '朝阳区XX路XX号', price: '¥12,000,000', area: '120㎡', status: '在售', image: 'https://picsum.photos/id/1040/100/100' },
-    { id: '#20250615002', name: '海淀区XX花园', address: '海淀区XX路XX号', price: '¥15,800,000', area: '150㎡', status: '待审核', image: 'https://picsum.photos/id/1067/100/100' },
-    { id: '#20250615003', name: '东城区XX大厦', address: '东城区XX路XX号', price: '¥22,500,000', area: '200㎡', status: '已售', image: 'https://picsum.photos/id/164/100/100' },
-    { id: '#20250615004', name: '西城区XX公寓', address: '西城区XX路XX号', price: '¥9,600,000', area: '90㎡', status: '在售', image: 'https://picsum.photos/id/1048/100/100' }
+    { id: '#20250615001', name: '朝阳区香河小区', address: '朝阳区14路21号', price: '¥12,000,000', area: '120㎡', status: '在售', image: 'https://picsum.photos/id/1040/100/100' },
+    { id: '#20250615002', name: '海淀区海滨花园', address: '海淀区54路26号', price: '¥15,800,000', area: '150㎡', status: '待审核', image: 'https://picsum.photos/id/1067/100/100' },
+    { id: '#20250615003', name: '东城区携程大厦', address: '东城区崇阳路78号', price: '¥22,500,000', area: '200㎡', status: '已售', image: 'https://picsum.photos/id/164/100/100' },
+    { id: '#20250615004', name: '西城区青年公寓', address: '西城区海兴路56号', price: '¥9,600,000', area: '90㎡', status: '在售', image: 'https://picsum.photos/id/1048/100/100' }
   ]
 
 

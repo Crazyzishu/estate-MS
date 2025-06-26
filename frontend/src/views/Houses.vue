@@ -294,7 +294,7 @@ const handleCurrentChange = (pageNum) => {
         
         <el-table-column label="操作">
           <template #default="scope">
-            <el-button 
+            <div class="111"><el-button 
               size="small" 
               :icon="View" 
               @click="openHouseDetail(scope.row.houseId)"
@@ -313,7 +313,7 @@ const handleCurrentChange = (pageNum) => {
               type="danger"
               plain
               @click="deleteHouse(scope.row.houseId)"
-            >删除</el-button>
+            >删除</el-button></div>
           </template>
         </el-table-column>
       </el-table>
