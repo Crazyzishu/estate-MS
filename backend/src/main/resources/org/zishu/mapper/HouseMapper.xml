@@ -19,8 +19,8 @@
 
 <!--    新增房源-->
     <insert id="insert" parameterType="org.zishu.pojo.House">
-        INSERT INTO houses (type, address, price, area, room_type, description, manager_id, created_at, updated_at,images)
-        VALUES (#{type}, #{address}, #{price}, #{area}, #{roomType}, #{description}, #{managerId}, #{createdAt}, #{updatedAt},#{images})
+        INSERT INTO houses (type, address, price, area, room_type, description, manager_id, created_at, updated_at)
+        VALUES (#{type}, #{address}, #{price}, #{area}, #{roomType}, #{description}, #{managerId}, #{createdAt}, #{updatedAt})
     </insert>
 
     <!--    修改房源信息-->
