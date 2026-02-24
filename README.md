@@ -11,12 +11,3 @@
 
 - `frontend/`: 前端源码
 - `backend/`: 后端源码
-
-## 安装与运行
-
-### 启动后端服务
-
-```bash
-cd backend
-npm install
-npm start
